@@ -1,9 +1,11 @@
-package go
+package go.strings;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import static go.Builtin.*;
+import static go.builtin.Builtin.*;
 
 public final class Strings {
   /**
@@ -15,6 +17,28 @@ public final class Strings {
    */
   public static boolean contains(String s, String substr) {
     return s.contains(substr);
+  }
+
+  /**
+   * ContainsAny reports whether any Unicode code points in chars are within s.
+   *
+   * @param s
+   * @param chars
+   * @return
+   */
+  public static boolean containsAny(String s, String chars) {
+    return StringUtils.containsAny(s, chars);
+  }
+
+  /**
+   * ContainsRune reports whether the Unicode code point r is within s.
+   *
+   * @param s
+   * @param r
+   * @return
+   */
+  public static boolean contains(String s, char r) {
+    return s.indexOf(r) > -1;
   }
 
   /**
@@ -38,7 +62,6 @@ public final class Strings {
    * sep is placed between elements in the resulting string.
    */
   public static String join(String[] a, int start, int end, String sep) {
-    // Copy of algorithm from String#join(CharSequence, CharSequence...)
     Objects.requireNonNull(sep);
     Objects.requireNonNull(a);
     // Number of elements not likely worth Arrays.stream overhead.
@@ -47,6 +70,18 @@ public final class Strings {
       joiner.add(a[i]);
     }
     return joiner.toString();
+  }
+
+  /**
+   * Replace returns a copy of the string s with the first n
+   * non-overlapping instances of old replaced by new.
+   * If old is empty, it matches at the beginning of the string
+   * and after each UTF-8 sequence, yielding up to k+1 replacements
+   * for a k-rune string.
+   * If n < 0, there is no limit on the number of replacements.
+   */
+  public static String replace(String s, String old, String aNew, int n) {
+    return StringUtils.replace(s, old, aNew, n < 0 ? -1 : n);
   }
 
   private Strings() {}

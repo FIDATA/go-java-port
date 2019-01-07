@@ -3,23 +3,23 @@
  * Java port of tests for functions for Duration formatting and parsing
  * from go/time package
  * Port is made from version go1.11.1
- * Copyright © 2018  Basil Peace
+ * Copyright © 2018-2019  Basil Peace
  * Copyright 2009, 2010 The Go Authors. All rights reserved.
  *
- * This file is part of gradle-packer-plugin.
+ * This file is part of go-java-port.
  *
- * This plugin is free software: you can redistribute it and/or modify
+ * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License
  * as published by the Free Software Foundation, either version 3
  * of the License, or (at your option) any later version.
  *
- * This plugin is distributed in the hope that it will be useful,
+ * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this plugin.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this library.  If not, see <https://www.gnu.org/licenses/>.
  */
 package go.time
 
@@ -37,13 +37,13 @@ import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 
 /**
- * Unit tests for {@code DurationAdapter}
+ * Unit tests for {@code Time}
  * Java port of tests for functions for Duration formatting and parsing
  * from {@code go/time} package
  */
 @RunWith(JUnitParamsRunner)
 @CompileStatic
-final class DurationAdapterTest {
+final class TimeTest {
   /*
    * WORKAROUND:
    * Otherwise we have error:
@@ -75,9 +75,9 @@ final class DurationAdapterTest {
   @Parameters(method = 'durationTests')
   @TestCaseName('string({1}) == "{0}"')
   void testString(final String expected, final Duration d) {
-    assert DurationAdapter.string(d) == expected
+    assert Time.string(d) == expected
     if (!(d.negative || d.zero)) {
-      assert DurationAdapter.string(d.negated()/*Duration.ofSeconds(-d.seconds, -d.nano)*/) == "-$expected"
+      assert Time.string(d.negated()/*Duration.ofSeconds(-d.seconds, -d.nano)*/) == "-$expected"
     }
   }
 
@@ -111,9 +111,9 @@ final class DurationAdapterTest {
        * https://bugs.openjdk.java.net/browse/JDK-8196003
        * <grv87 2018-08-12>
        */
-      ['11us', true, Duration.ofNanos(11 * DurationAdapter.NANOSECONDS_PER_MICROSECOND)],
-      ['12µs', true, Duration.ofNanos(12 * DurationAdapter.NANOSECONDS_PER_MICROSECOND)], // U+00B5
-      ['12μs', true, Duration.ofNanos(12 * DurationAdapter.NANOSECONDS_PER_MICROSECOND)], // U+03BC
+      ['11us', true, Duration.ofNanos(11 * Time.NANOSECONDS_PER_MICROSECOND)],
+      ['12µs', true, Duration.ofNanos(12 * Time.NANOSECONDS_PER_MICROSECOND)], // U+00B5
+      ['12μs', true, Duration.ofNanos(12 * Time.NANOSECONDS_PER_MICROSECOND)], // U+03BC
       ['13ms', true, Duration.ofMillis(13)],
       ['14s', true, Duration.ofSeconds(14)],
       ['15m', true, Duration.ofMinutes(15)],
@@ -165,11 +165,11 @@ final class DurationAdapterTest {
   @TestCaseName('parseDuration("{0}") {3}')
   void testParseDuration(final String aIn, final boolean ok, final Duration want, final String ignored) {
     if (ok) {
-      assert DurationAdapter.parseDuration(aIn) == want
+      assert Time.parseDuration(aIn) == want
     } else {
       thrown.expect(DateTimeParseException)
       thrown.expectMessage(startsWith('time: '))
-      DurationAdapter.parseDuration(aIn)
+      Time.parseDuration(aIn)
     }
   }
 
@@ -180,8 +180,8 @@ final class DurationAdapterTest {
       // Resolutions finer than milliseconds will result in
       // imprecise round-trips.
       Duration d0 = Duration.ofMillis(rand.nextInt())
-      String s = DurationAdapter.string(d0)
-      Duration d1 = DurationAdapter.parseDuration(s)
+      String s = Time.string(d0)
+      Duration d1 = Time.parseDuration(s)
       assert d0 == d1
     }
   }

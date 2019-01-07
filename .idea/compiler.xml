@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <addNotNullAssertions enabled="false" />
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Immutables" enabled="true">
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.immutables/value/2.7.4/5bb97ea9bdd04458f1eee1f3bb47159b51170206/value-2.7.4.jar" />
+        </processorPath>
+        <module name="org.fidata.go-java-port" />
+        <module name="org.fidata.go-java-port.functionalTest" />
+        <module name="org.fidata.go-java-port.main" />
+        <module name="org.fidata.go-java-port.test" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

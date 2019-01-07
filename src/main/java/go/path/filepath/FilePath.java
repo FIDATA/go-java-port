@@ -1,20 +1,146 @@
 package go.path.filepath;
 
-import static go.Builtin.*;
-import static go.Runtime.GoOS.*;
+import static go.builtin.Builtin.*;
+import static go.builtin.Conversions.*;
+import static go.runtime.Runtime.GoOS.*;
 
-import go.Os;
-import go.Strings;
-import go.strings.Utf8;
-import go.Runtime;
-import groovy.lang.Tuple2;
-import groovy.lang.Tuple3;
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
+import go.os.Os;
+import go.strings.Strings;
+import go.strings.utf8.Utf8;
+import go.runtime.Runtime;
 import org.apache.commons.lang3.StringUtils;
+import org.immutables.value.Value;
 
 import java.util.List;
 
 final class FilePath {
   public static final char SEPARATOR = Os.PATH_SEPARATOR;
+
+  /**
+   * Clean returns the shortest path name equivalent to path
+   * by purely lexical processing. It applies the following rules
+   * iteratively until no further processing can be done:
+   *
+   *	1. Replace multiple Separator elements with a single one.
+   *	2. Eliminate each . path name element (the current directory).
+   *	3. Eliminate each inner .. path name element (the parent directory)
+   *	   along with the non-.. element that precedes it.
+   *	4. Eliminate .. elements that begin a rooted path:
+   *	   that is, replace "/.." by "/" at the beginning of a path,
+   *	   assuming Separator is '/'.
+   *
+   * The returned path ends in a slash only if it represents a root directory,
+   * such as "/" on Unix or `C:\` on Windows.
+   *
+   * Finally, any occurrences of slash are replaced by Separator.
+   *
+   * If the result of this process is an empty string, Clean
+   * returns the string ".".
+   *
+   * See also Rob Pike, ``Lexical File Names in Plan 9 or
+   * Getting Dot-Dot Right,''
+   * https://9p.io/sys/doc/lexnames.html
+   */
+  public static String clean(String path) {
+    String originalPath = path;
+    int volLen = volumeNameLen(path);
+    path = path[volLen:]
+    if path == "" {
+      if volLen > 1 && originalPath[1] != ':' {
+        // should be UNC
+        return fromSlash(originalPath);
+      }
+      return originalPath + ".";
+    }
+    boolean rooted = Os.isPathSeparator(path.charAt(0));
+
+    // Invariants:
+    //	reading from path; r is index of next byte to process.
+    //	writing to buf; w is index of next byte to write.
+    //	dotdot is index in buf where .. must stop, either because
+    //		it is the leading slash or it is a leading ../../.. prefix.
+    int n = len(path);
+    int out = lazybuf{path: path, volAndPath: originalPath, volLen: volLen};
+    int r = 0;
+    int dotdot = 0;
+    if (rooted) {
+      out.append(Separator);
+      r, dotdot = 1, 1
+    }
+
+    while (r < n) {
+      if (Os.isPathSeparator(path[r])) {
+        // empty path element
+        r++
+      } else if (path[r] == '.' && (r+1 == n || os.IsPathSeparator(path[r+1]))) {
+        // . element
+        r++
+      } else if (path[r] == '.' && path[r+1] == '.' && (r+2 == n || os.IsPathSeparator(path[r+2]))) {
+        // .. element: remove to last separator
+        r += 2;
+        if (out.w > dotdot) {
+          // can backtrack
+          out.w--
+          for out.w > dotdot && !os.IsPathSeparator(out.index(out.w)) {
+            out.w--
+          }
+        } else if (!rooted) {
+          // cannot backtrack, but not rooted, so append .. element.
+          if (out.w > 0) {
+            out.append(Separator)
+          }
+          out.append('.')
+          out.append('.')
+          dotdot = out.w
+        }
+      } else {
+        // real path element.
+        // add slash if needed
+        if (rooted && out.w != 1 || !rooted && out.w != 0) {
+          out.append(Separator)
+        }
+        // copy element
+        for (); r < n && !os.IsPathSeparator(path[r]); r++) {
+          out.append(path[r])
+        }
+      }
+    }
+
+    // Turn empty string into "."
+    if (out.w == 0) {
+      out.append('.')
+    }
+
+    return fromSlash(out.string());
+  }
+
+  /**
+   * ToSlash returns the result of replacing each separator character
+   * in path with a slash ('/') character. Multiple separators are
+   * replaced by multiple slashes.
+   *
+   * @param path
+   * @return
+   */
+  public static String toSlash(String path) {
+    if (SEPARATOR == '/') {
+      return path;
+    }
+    return Strings.replace(path, string(SEPARATOR), "/", -1);
+  }
+
+  /**
+   * FromSlash returns the result of replacing each slash ('/') character
+   * in path with a separator character. Multiple slashes are replaced
+   * by multiple separators.
+   */
+  public static String fromSlash(String path) {
+    if (SEPARATOR == '/') {
+      return path;
+    }
+    return Strings.replace(path, "/", string(SEPARATOR), -1);
+  }
 
   public static class ErrBadPattern extends RuntimeException { // TOTHINK
     ErrBadPattern() {
@@ -57,18 +183,18 @@ final class FilePath {
   public boolean match(String pattern, String name) {
     pattern:
     while (len(pattern) > 0) {
-      Tuple3<Boolean, String, String> scanChunkResult = scanChunk(pattern);
-      boolean star = scanChunkResult.getFirst();
-      String chunk = scanChunkResult.getSecond();
-      pattern = scanChunkResult.getThird();
+      ScanChunkResult scanChunkResult = scanChunk(pattern);
+      boolean star = scanChunkResult.getStar();
+      String chunk = scanChunkResult.getChunk();
+      pattern = scanChunkResult.getRest();
       if (star && chunk.isEmpty()) {
         // Trailing * matches rest of string unless it has a /.
         return !Strings.contains(name, string(SEPARATOR));
       }
       // Look for match at current position.
-      Tuple2<String, Boolean> matchChunkResult = matchChunk(chunk, name);
-      String t = matchChunkResult.getFirst();
-      boolean ok = matchChunkResult.getSecond();
+      MatchChunkResult matchChunkResult = matchChunk(chunk, name);
+      String t = matchChunkResult.getRest();
+      boolean ok = matchChunkResult.getOk();
       // if we're the last chunk, make sure we've exhausted the name
       // otherwise we'll give a false result even if we could still match
       // using the star
@@ -81,8 +207,8 @@ final class FilePath {
         // Cannot skip /.
         for (int i = 0; i < len(name) && name.charAt(i) != SEPARATOR; i++) {
           matchChunkResult = matchChunk(chunk, name.substring(i + 1));
-          t = matchChunkResult.getFirst();
-          ok = matchChunkResult.getSecond();
+          t = matchChunkResult.getRest();
+          ok = matchChunkResult.getOk();
           if (ok) {
             // if we're the last chunk, make sure we exhausted the name
             if (len(pattern) == 0 && len(t) > 0) {
@@ -98,6 +224,16 @@ final class FilePath {
     return len(name) == 0;
   }
 
+  @Value.Immutable
+  private static abstract class ScanChunkResult {
+    @Value.Parameter
+    abstract boolean getStar();
+    @Value.Parameter
+    abstract String getChunk();
+    @Value.Parameter
+    abstract String getRest();
+  }
+
   /**
    * scanChunk gets the next segment of pattern, which is a non-star string
    * possibly preceded by a star.
@@ -105,7 +241,7 @@ final class FilePath {
    * @param pattern
    * @return Tuple of (star, chunk, rest)
    */
-  private Tuple3<Boolean, String, String> scanChunk(String pattern) {
+  private ScanChunkResult scanChunk(String pattern) {
     int i = 0;
     boolean star = false;
     int length = len(pattern);
@@ -138,7 +274,15 @@ final class FilePath {
           break;
       }
     }
-    return new Tuple3<>(star, pattern.substring(0, i), pattern.substring(i));
+    return ImmutableScanChunkResult.of(star, pattern.substring(0, i), pattern.substring(i));
+  }
+
+  @Value.Immutable
+  private abstract static class MatchChunkResult {
+    @Value.Parameter
+    abstract String getRest();
+    @Value.Parameter
+    abstract boolean getOk();
   }
 
   /**
@@ -151,12 +295,12 @@ final class FilePath {
    * @return Tuple of (rest, ok)
    * @throws ErrBadPattern
    */
-  private Tuple2<String, Boolean> matchChunk(String chunk, String s) {
+  private MatchChunkResult matchChunk(String chunk, String s) {
     int chunkStart = 0;
     int chunkLength = len(chunk);
     int sStart = 0;
     int sLength = len(s);
-    Tuple2<Integer, Integer> decodeRuneInStringResult;
+    Utf8.DecodeRuneInStringResult decodeRuneInStringResult;
     int n;
     return_loop:
     while (chunkStart < chunkLength) {
@@ -167,8 +311,8 @@ final class FilePath {
         case '[':
           // character class
           decodeRuneInStringResult = Utf8.decodeRuneInString(s, sStart);
-          int r = decodeRuneInStringResult.getFirst();
-          n = decodeRuneInStringResult.getSecond();
+          int r = decodeRuneInStringResult.getR();
+          n = decodeRuneInStringResult.getSize();
           sStart += n;
           chunkLength += 1;
           // We can't end right after '[', we're expecting at least
@@ -191,7 +335,7 @@ final class FilePath {
             }
             lo;
             hi rune;
-            Tuple2<Integer, Integer> getEscResult = getEsc(chunk, chunkStart);
+            GetEscResult getEscResult = getEsc(chunk, chunkStart);
 
             hi = lo
             if (chunk.charAt(0) == '-') {
@@ -213,8 +357,7 @@ final class FilePath {
           if (s.charAt(sStart) == SEPARATOR) {
             break return_loop;
           }
-          decodeRuneInStringResult = Utf8.decodeRuneInString(s, sStart);
-          n = decodeRuneInStringResult.getSecond();
+          n = Utf8.decodeRuneInString(s, sStart).getSize();
           sStart += n;
           chunkStart++;
           break;
@@ -235,8 +378,16 @@ final class FilePath {
           sStart++;
           chunkStart++;
       }
-    }
-    return new Tuple2<>(s.substring(sStart), Boolean.TRUE);
+    } // TODO: Ok is not needed?
+    return ImmutableMatchChunkResult.of(s.substring(sStart), true);
+  }
+
+  @Value.Immutable
+  private static abstract class GetEscResult {
+    @Value.Parameter
+    abstract int getR();
+    @Value.Parameter
+    abstract int getNChunk();
   }
 
   /**
@@ -248,7 +399,7 @@ final class FilePath {
    * @return (r, nchunk)
    * @throws ErrBadPattern
    */
-  private static Tuple2<Integer, Integer> getEsc(String chunk) {
+  private static GetEscResult getEsc(String chunk) {
     return getEsc(chunk, 0);
   }
 
@@ -262,7 +413,7 @@ final class FilePath {
    * @return (r, nchunk)
    * @throws ErrBadPattern
    */
-  private static Tuple2<Integer, Integer> getEsc(String chunk, int start) {
+  private static GetEscResult getEsc(String chunk, int start) {
     if (start >= len(chunk) || chunk.charAt(start) == '-' || chunk.charAt(start) == ']') {
       throw new ErrBadPattern();
     }
@@ -272,19 +423,17 @@ final class FilePath {
         throw new ErrBadPattern();
       }
     }
-    Tuple2<Integer, Integer> decodeRuneInStringResult;
+    Utf8.DecodeRuneInStringResult decodeRuneInStringResult;
     try {
       decodeRuneInStringResult = Utf8.decodeRuneInString(chunk, start);
     } catch (Utf8.RuneError e) {
       throw new ErrBadPattern(e);
     }
-    int r = decodeRuneInStringResult.getFirst();
-    int n = decodeRuneInStringResult.getSecond();
-    start += n;
+    start += decodeRuneInStringResult.getSize();
     if (start >= len(chunk)) {
       throw new ErrBadPattern();
     }
-    return new Tuple2<>(r, start);
+    return GetEscResultImmutable.of(decodeRuneInStringResult.getR(), start);
   }
 
   /**
@@ -356,27 +505,35 @@ final class FilePath {
     }
   }
 
+  @Value.Immutable
+  private abstract static class CleanGlobPathWindowsResult {
+    @Value.Parameter
+    abstract int getPrefixLen();
+    @Value.Parameter
+    abstract String getCleaned();
+  }
+
   /**
    * cleanGlobPathWindows is windows version of cleanGlobPath.
    *
    * @param path
    * @return Tuple of (prefixLen, cleaned)
    */
-  private Tuple2<Integer, String> cleanGlobPathWindows(String path) {
+  private CleanGlobPathWindowsResult cleanGlobPathWindows(String path) {
     int length = len(path);
     int vollen = volumeNameLen(path);
     if (path.isEmpty()) {
-      return new Tuple2<>(0, ".");
+      return ImmtableCleanGlobPathWindowsResult.of(0, ".");
     } else if (vollen + 1 == length && Os.isPathSeparator(path.charAt(length - 1))) { // /, \, C:\ and C:/
       // do nothing to the path
-      return new Tuple2<>(vollen + 1, path);
+      return ImmtableCleanGlobPathWindowsResult.of(vollen + 1, path);
     } else if (vollen == length && length == 2) { // C:
-      return new Tuple2<>(vollen, path + '.'); // convert C: into C:.
+      return ImmtableCleanGlobPathWindowsResult.of(vollen, path + '.'); // convert C: into C:.
     } else {
       if (vollen >= length) {
         vollen = length - 1;
       }
-      return new Tuple2<>(vollen, path.substring(0, length - 1)); // chop off trailing separator
+      return ImmtableCleanGlobPathWindowsResult.of(vollen, path.substring(0, length - 1)); // chop off trailing separator
     }
   }
 
@@ -421,7 +578,7 @@ final class FilePath {
    * @return
    */
   private boolean hasMeta(String path) {
-    return StringUtils.containsAny(path, MAGIC_CHARS);
+    return Strings.containsAny(path, MAGIC_CHARS);
   }
 
   /**
@@ -497,6 +654,14 @@ final class FilePath {
     return head + SEPARATOR + tail;
   }
 
+  @Value.Immutable
+  public static abstract class SplitResult {
+    @Value.Parameter
+    abstract String getDir();
+    @Value.Parameter
+    abstract String getFile();
+  }
+
   /**
    * Split splits path immediately following the final Separator,
    * separating it into a directory and file name component.
@@ -507,13 +672,13 @@ final class FilePath {
    * @param path
    * @return (dir, file)
    */
-  public static Tuple2<String, String> split(String path) {
+  public static SplitResult split(String path) {
     String vol = volumeName(path);
     int i = len(path) - 1;
     while (i >= len(vol) && !Os.isPathSeparator(path.charAt(i))) {
       i--;
     }
-    return new Tuple2(path.substring(0, i + 1), path.substring(i + 1));
+    return ImmutableSplitResult.of(path.substring(0, i + 1), path.substring(i + 1));
   }
 
   /**

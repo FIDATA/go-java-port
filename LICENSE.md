@@ -1,5 +1,5 @@
 java-go-port
-Copyright © 2018-2019  Basil Peace
+Copyright © 2019  Basil Peace
 
 This library is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License

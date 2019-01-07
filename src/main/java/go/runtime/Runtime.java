@@ -1,4 +1,4 @@
-package go;
+package go.runtime;
 
 import org.apache.commons.lang3.SystemUtils;
 
@@ -6,22 +6,27 @@ public final class Runtime {
   public enum GoOS {
     DARWIN,
     DRAGONFLY,
-    JS, // WebAssembly
+    /**
+     * WebAssembly
+     */
+    JS,
     LINUX,
     ANDROID,
     SOLARIS,
     FREEBSD,
-    NACL, // Native Client
+    /**
+     * Native Client
+     */
+    NACL,
     NETBSD,
     OPENBSD,
     PLAN9,
     WINDOWS,
-    ZOS
+    ZOS;
 
-    // @JsonValue
     @Override
     public String toString() {
-      return this.name().toLowerCase();
+      return name().toLowerCase();
     }
   }
 

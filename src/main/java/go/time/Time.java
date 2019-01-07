@@ -2,23 +2,23 @@
  * Java port of functions for Duration formatting and parsing
  * from go/time package
  * Port is made from version go1.11.1
- * Copyright © 2018  Basil Peace
+ * Copyright © 2018-2019  Basil Peace
  * Copyright 2009, 2010 The Go Authors. All rights reserved.
  *
- * This file is part of gradle-packer-plugin.
+ * This file is part of go-java-port.
  *
- * This plugin is free software: you can redistribute it and/or modify
+ * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License
  * as published by the Free Software Foundation, either version 3
  * of the License, or (at your option) any later version.
  *
- * This plugin is distributed in the hope that it will be useful,
+ * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this plugin.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this library.  If not, see <https://www.gnu.org/licenses/>.
  */
 package go.time;
 
@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * from {@code go/time} package
  */
 @SuppressWarnings({"HardCodedStringLiteral", "CharUsedInArithmeticContext", "UnnecessaryExplicitNumericCast"})
-public final class DurationAdapter {
+public final class Time {
   // Common durations. There is no definition for units of Day or larger
   // to avoid confusion across daylight savings time zone transitions.
   public final static Duration NANOSECOND = Duration.of(1L, ChronoUnit.NANOS);
@@ -367,7 +367,7 @@ public final class DurationAdapter {
     .put("h", HOUR.toNanos())
     .build();
 
-  private DurationAdapter() {
+  private Time() {
     throw new UnsupportedOperationException();
   }
 }

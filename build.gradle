@@ -37,6 +37,13 @@ contacts {
   }
 }
 
+dependencies {
+  annotationProcessor group: 'org.immutables', name: 'value', version: '[2, 3['
+  compileOnly group: 'org.immutables', name: 'value', version: '[2, 3['
+  api group: 'com.google.guava', name: 'guava', version: '27.0-jre'
+  implementation group: 'org.apache.commons', name: 'commons-lang3', version: '[3, 4['
+}
+
 wrapper {
   gradleVersion = '5.1'
 }

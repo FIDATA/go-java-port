@@ -1,0 +1,191 @@
+= Go Java Port
+
+This library contains ports of some core Go packages to Java.
+
+Some of Go features works more or less differently from their siblings in Java.
+The goal of this library is to provide the same behavior as Go, avoiding any surprises.
+
+This library can be used to port higher-level libraries from Go to Java.
+It is used, for example,
+by https://github.com/FIDATA/gradle-packer-plugin[org.fidata.packer] project.
+
+Current version of port is made from Go 1.11.4.
+
+Licensed under LGPL version 3 or later.
+
+== Content
+
+[cols="<,^",options="header"]
+|===
+^|Go package
+^|Status of port
+
+|`builtin`
+| partial
+
+|`runtime`
+| partial
+
+|`strings`
+| partial
+
+|`strings/utf8`
+| partial
+
+|`os`
+| partial
+
+|`path/filepath`
+| partial
+
+|`time`
+| partial
+|===
+
+TODO: list functions & link to javadoc
+
+== Usage
+
+TODO: maven coordinates
+
+[arabic,start="0"]
+. Code ported from Go should typically contain the following import:
++
+--
+[source,java]
+----
+import static go.builtin.Builtin.*;
+----
+
+This will add built-in Go predeclared functions.
+--
+
+. All packages are classes are in `go` package. // TODO
+--
+Its structure resembles the same of Go.
+
+For example, the following import in Go:
+
+[source,go]
+----
+import (
+ "os"
+)
+----
+
+becomes the following in Java:
+
+[source,java]
+----
+import go.os.Os;
+----
+--
+
+== Port Guide
+
+Some guides to port code from Go to Java:
+
+[arabic,start="0"]
+. We make direct translation and don't try to implement the same features in more-Java-like style.
++
+--
+This allows us not to reinvent the wheel, to keep code as close to Go as possible,
+to avoid surprises and incompatibilities and update it whenever Go is updated.
+--
+
+. Basic syntax changes (`if`, `for` etc.) are obvious and not discussed.
+
+. In Java, array or String slices are not first-class citizens.
++
+--
+If a caller wants to apply a function to a slice of an array or a String, he would have ended copying it.
+
+Go does have slices and avoids extra memory copying. So, a lot of Go code is written in this style.
+
+For example:
+
+TODO
+
+To overcome this:
+
+.. Most functions that accept String or array are provided in two or three overloaded versions that also accept
+   optional starting and ending indices.
+
+.. Most String-handling functions are actually work on array of characters instead of String itself.
+
+When this is not relevant, string slices becomes calls of
+https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#substring-int-int-[String#substring]:
+[options="header",cols="2"]
+|===
+^|Go
+^|Java
+
+a|
+[source,go]
+----
+pattern[0:i]
+----
+a|
+[source,java]
+----
+pattern.substring(0, i)
+----
+
+a|
+[source,go]
+----
+pattern[i:]
+----
+a|
+[source,java]
+----
+pattern.substring(i)
+----
+|===
+Note that Go and Java both have the same behavior to exclude ending index.
+--
+
+. Instead of returning errors, in Java we throw exceptions.
+
+. Java doesn't have built-in tuples. Since we don't return errors, most of the functions in Java return single values.
+For those who don't we expose results in instances of `*Result` immutable classes.
+
+. There is no need to convert `char` to `string` during concatenation:
++
+--
+[options="header",cols="2"]
+|===
+^|Go
+^|Java
+
+a|
+[source,go]
+----
+n = o + string(Separator)
+----
+a|
+[source,java]
+----
+n = o + Separator
+----
+|===
+--
+
+. TODO: Note on pointers and nil/null
+
+. Some optimizations may be applied, including:
++
+--
+* Saving constant values to static final fields
+--
+
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Copyright © 2019  Basil Peace
+
+This file is part of go-java-port.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.

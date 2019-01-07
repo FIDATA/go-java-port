@@ -1,12 +1,11 @@
-package go;
+package go.os;
 
-import org.fidata.CustomEnumSet32;
+// import org.fidata.CustomEnumSet32;
+import go.runtime.Runtime;
 
 import java.nio.file.attribute.FileTime;
-import java.util.EnumSet;
-import java.util.Set;
 
-import static go.Runtime.GoOS.*;
+import static go.runtime.Runtime.GoOS.*;
 
 public final class Os {
   public static final char PATH_SEPARATOR = Runtime.GOOS == WINDOWS ? '\\' : '/';
@@ -21,7 +20,7 @@ public final class Os {
     return Runtime.GOOS == WINDOWS ? c == '\\' || c == '/' : PATH_SEPARATOR == c;
   }
 
-  public enum FileModeEnum implements value {
+  public enum FileModeEnum {
     /**
      * d: is a directory
      */
@@ -87,9 +86,9 @@ public final class Os {
     static final int /*FileMode*/ modePerm = 0777; // Unix permission bits
   }
 
-  public class FileMode extends CustomEnumSet32<FileModeEnum> {
+  public class FileMode /*extends CustomEnumSet32<FileModeEnum>*/ {
     FileMode() {
-      super(FileModeEnum, )
+      // super(FileModeEnum, )
     }
 
   }
