@@ -1,0 +1,42 @@
+#!/usr/bin/env groovy
+/*
+ * Build script for go-java-port
+ * Copyright © 2019  Basil Peace
+ *
+ * This file is part of go-java-port.
+ *
+ * This library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation, either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library.  If not, see <https://www.gnu.org/licenses/>.
+ */
+plugins {
+  id 'org.fidata.project' version '6.0.0-gradle-5-0-SNAPSHOT'
+  id 'org.fidata.project.java' version '6.0.0-gradle-5-0-SNAPSHOT'
+}
+
+description = 'Some of core Go packages ported to Java'
+tags.set(['go', 'golang', 'java', 'port']) // TODO
+//noinspection GroovyUnusedAssignment
+license = 'Apache-2.0'
+//noinspection GroovyUnusedAssignment
+publicReleases = true
+contacts {
+  'grv87@yandex.ru' {
+    moniker 'Basil Peace'
+    github 'grv87'
+    roles 'owner', 'developer'
+  }
+}
+
+wrapper {
+  gradleVersion = '5.1'
+}

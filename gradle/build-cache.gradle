@@ -1,0 +1,41 @@
+#!/usr/bin/env groovy
+/*
+ * Build cache configuration for go-java-port
+ * Copyright © 2019  Basil Peace
+ *
+ * This file is part of go-java-port.
+ *
+ * This library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation, either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library.  If not, see <https://www.gnu.org/licenses/>.
+ */
+/*
+ * WORKAROUND:
+ * Jenkins doesn't set CI environment variable
+ * https://issues.jenkins-ci.org/browse/JENKINS-36707
+ * <grv87 2018-06-27>
+ */
+ext.pushToRemoteCache = System.getenv().with { containsKey('CI') || containsKey('JENKINS_URL') }
+buildCache {
+  local {
+    enabled = !pushToRemoteCache
+    removeUnusedEntriesAfterDays = 30
+  }
+  remote(HttpBuildCache) {
+    url = 'https://fidata.jfrog.io/fidata/local.gradle.cache/'
+    credentials {
+      username = settings.ext.artifactoryUser
+      password = settings.ext.artifactoryPassword
+    }
+    push = pushToRemoteCache
+  }
+}
