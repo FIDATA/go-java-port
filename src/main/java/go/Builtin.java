@@ -2013,7 +2013,7 @@ public final class Builtin {
    */
   public static <T> T[] make(Class<T> t, int size) {
     @SuppressWarnings("unchecked")
-    final T[] a = final (final T[]) Array.newInstance(t, size);
+    final T[] a = (T[])Array.newInstance(t, size);
     return a;
   }
 

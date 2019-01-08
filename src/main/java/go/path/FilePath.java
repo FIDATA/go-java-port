@@ -4,6 +4,7 @@ import static go.Builtin.*;
 import static go.Conversions.*;
 import static go.Runtime.GoOS.*;
 import com.google.common.collect.ImmutableList;
+import go.Conversions;
 import go.Os;
 import go.Sort;
 import go.Strings;
@@ -70,7 +71,7 @@ public final class FilePath {
       char[] result = makechars(volLen + w);
       copy(result, volAndPath, 0, volLen);
       copy(result, volLen, buf, 0, w);
-      return string(result);
+      return Conversions.string(result);
     }
   }
 
@@ -293,7 +294,7 @@ public final class FilePath {
   }
 
   @Value.Immutable(builder = false)
-  private abstract static class ScanChunkResult {
+  abstract static class ScanChunkResult {
     @Value.Parameter
     public abstract boolean getStar();
     @Value.Parameter
@@ -347,7 +348,7 @@ public final class FilePath {
   }
 
   @Value.Immutable(builder = false)
-  private abstract static class MatchChunkResult {
+  abstract static class MatchChunkResult {
     @Value.Parameter
     public abstract int getRestLow();
     @Value.Parameter
@@ -458,7 +459,7 @@ public final class FilePath {
   }
 
   @Value.Immutable(builder = false)
-  private abstract static class GetEscResult {
+  abstract static class GetEscResult {
     @Value.Parameter
     public abstract int getR();
     @Value.Parameter
@@ -497,7 +498,7 @@ public final class FilePath {
     if (chunkLow >= chunkHigh) {
       throw new ErrBadPattern();
     }
-    return GetEscResultImmutable.of(decodeRuneInStringResult.getR(), chunkLow);
+    return ImmutableGetEscResult.of(decodeRuneInStringResult.getR(), chunkLow);
   }
 
   /**
@@ -575,7 +576,7 @@ public final class FilePath {
   }
 
   @Value.Immutable(builder = false)
-  private abstract static class CleanGlobPathWindowsResult {
+  abstract static class CleanGlobPathWindowsResult {
     @Value.Parameter
     public abstract int getPrefixLen();
     @Value.Parameter
@@ -592,17 +593,17 @@ public final class FilePath {
     int length = len(path);
     int vollen = volumeNameLen(path);
     if (path.isEmpty()) {
-      return ImmtableCleanGlobPathWindowsResult.of(0, ".");
+      return ImmutableCleanGlobPathWindowsResult.of(0, ".");
     } else if (vollen + 1 == length && Os.isPathSeparator(path.charAt(length - 1))) { // /, \, C:\ and C:/
       // do nothing to the path
-      return ImmtableCleanGlobPathWindowsResult.of(vollen + 1, path);
+      return ImmutableCleanGlobPathWindowsResult.of(vollen + 1, path);
     } else if (vollen == length && length == 2) { // C:
-      return ImmtableCleanGlobPathWindowsResult.of(vollen, path + '.'); // convert C: into C:.
+      return ImmutableCleanGlobPathWindowsResult.of(vollen, path + '.'); // convert C: into C:.
     } else {
       if (vollen >= length) {
         vollen = length - 1;
       }
-      return ImmtableCleanGlobPathWindowsResult.of(vollen, path.substring(0, length - 1)); // chop off trailing separator
+      return ImmutableCleanGlobPathWindowsResult.of(vollen, path.substring(0, length - 1)); // chop off trailing separator
     }
   }
 

@@ -185,7 +185,7 @@ public final class Time {
   }
 
   @Value.Immutable(builder = false)
-  private abstract static class LeadingIntResult {
+  abstract static class LeadingIntResult {
     @Value.Parameter
     public abstract long getX();
     @Value.Parameter
@@ -218,7 +218,7 @@ public final class Time {
   }
 
   @Value.Immutable(builder = false)
-  private abstract static class LeadingFractionResult {
+  abstract static class LeadingFractionResult {
     @Value.Parameter
     public abstract long getX();
     @Value.Parameter
