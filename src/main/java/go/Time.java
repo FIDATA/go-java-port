@@ -1,5 +1,5 @@
 /*
- * Java port of functions for Duration formatting and parsing
+ * Java port of functions for Time formatting and parsing
  * from go/time package
  * Port is made from version go1.11.1
  * Copyright © 2018-2019  Basil Peace
@@ -20,18 +20,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <https://www.gnu.org/licenses/>.
  */
-package go.time;
+package go;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
-import java.time.Duration;
+import org.immutables.value.Value;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 /**
- * Java port of functions for Duration formatting and parsing
+ * Java port of functions for Time formatting and parsing
  * from {@code go/time} package
  */
 @SuppressWarnings({"HardCodedStringLiteral", "CharUsedInArithmeticContext", "UnnecessaryExplicitNumericCast"})
@@ -76,7 +77,7 @@ public final class Time {
     final StringBuilder buf = new StringBuilder(); // TODO: capacity
 
     /*
-     * Don't use Duration.toNanos() since it causes overflow
+     * Don't use Time.toNanos() since it causes overflow
      * on values near the end of the range
      */
     final long s = d.getSeconds();
@@ -183,11 +184,19 @@ public final class Time {
     return new DateTimeParseException("time: bad [0-9]*", parsedData, errorIndex); // never printed
   }
 
+  @Value.Immutable(builder = false)
+  private abstract static class LeadingIntResult {
+    @Value.Parameter
+    public abstract long getX();
+    @Value.Parameter
+    public abstract int getRemLow();
+  }
+
   /**
    * Consumes the leading [0-9]* from s.
    * @throws DateTimeParseException on parse error
    */
-  private static Object[] leadingInt(final CharSequence s, final int w) {
+  private static LeadingIntResult leadingInt(final CharSequence s, final int w) {
     long x = 0L;
     int i;
     for (i = w; i < s.length(); i++){
@@ -205,7 +214,17 @@ public final class Time {
         throw errLeadingInt(s, w);
       }
     }
-    return new Object[]{x, i};
+    return ImmutableLeadingIntResult.of(x, i);
+  }
+
+  @Value.Immutable(builder = false)
+  private abstract static class LeadingFractionResult {
+    @Value.Parameter
+    public abstract long getX();
+    @Value.Parameter
+    public abstract double getScale();
+    @Value.Parameter
+    public abstract int getRemLow();
   }
 
   /**
@@ -213,7 +232,7 @@ public final class Time {
    * It is used only for fractions, so does not return an error on overflow,
    * it just stops accumulating precision.
    */
-  private static Object[] leadingFraction(final CharSequence s, final int w) {
+  private static LeadingFractionResult leadingFraction(final CharSequence s, final int w) {
     long x = 0L;
     double scale = 1.0D;
     int i;
@@ -239,7 +258,7 @@ public final class Time {
       x = y;
       scale *= NUMERAL_SYSTEM_BASE;
     }
-    return new Object[]{x, scale, i};
+    return ImmutableLeadingFractionResult.of(x, scale, i);
   }
 
   /**
@@ -275,7 +294,6 @@ public final class Time {
     if (w == l) {
       throw new DateTimeParseException(TIME_INVALID_DURATION + s, s, w);
     }
-    Object[] res;
     while (w < l) {
       long v, f = 0L; // integers before, after decimal point
       double scale = 1.0D; // value = v + f/scale
@@ -288,9 +306,9 @@ public final class Time {
       int pl = w;
       final int w_v = w;
       try {
-        res = leadingInt(s, w);
-        v = (long) res[0];
-        w = (int) res[1];
+        LeadingIntResult leadingIntResult = leadingInt(s, w);
+        v = leadingIntResult.getX();
+        w = leadingIntResult.getRemLow();
       } catch (DateTimeParseException e) {
         throw new DateTimeParseException(TIME_INVALID_DURATION + s, s, w_v, e);
       }
@@ -301,10 +319,10 @@ public final class Time {
       if (w < l && s.charAt(w) == '.') {
         w++;
         pl = w;
-        res = leadingFraction(s, w);
-        f = (long)res[0];
-        scale = (double)res[1];
-        w = (int)res[2];
+        LeadingFractionResult leadingFractionResult = leadingFraction(s, w);
+        f = leadingFractionResult.getX();
+        scale = leadingFractionResult.getScale();
+        w = leadingFractionResult.getRemLow();
         post = pl != w;
       }
       if (!pre && !post) {

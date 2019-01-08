@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 /*
- * Java port of tests for functions for Duration formatting and parsing
+ * Java port of tests for functions for Time formatting and parsing
  * from go/time package
  * Port is made from version go1.11.1
  * Copyright © 2018-2019  Basil Peace
@@ -23,6 +23,7 @@
  */
 package go.time
 
+import go.Time
 import groovy.transform.CompileStatic
 
 import static org.hamcrest.Matchers.startsWith
@@ -38,7 +39,7 @@ import org.junit.runner.RunWith
 
 /**
  * Unit tests for {@code Time}
- * Java port of tests for functions for Duration formatting and parsing
+ * Java port of tests for functions for Time formatting and parsing
  * from {@code go/time} package
  */
 @RunWith(JUnitParamsRunner)
@@ -77,7 +78,7 @@ final class TimeTest {
   void testString(final String expected, final Duration d) {
     assert Time.string(d) == expected
     if (!(d.negative || d.zero)) {
-      assert Time.string(d.negated()/*Duration.ofSeconds(-d.seconds, -d.nano)*/) == "-$expected"
+      assert Time.string(d.negated()/*Time.ofSeconds(-d.seconds, -d.nano)*/) == "-$expected"
     }
   }
 
@@ -107,7 +108,7 @@ final class TimeTest {
       ['10ns', true, Duration.ofNanos(10)],
       /*
        * WORKAROUND:
-       * There is no `Duration.toMicros` static method yet.
+       * There is no `Time.toMicros` static method yet.
        * https://bugs.openjdk.java.net/browse/JDK-8196003
        * <grv87 2018-08-12>
        */

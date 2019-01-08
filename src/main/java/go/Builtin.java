@@ -1,15 +1,18 @@
-package go.builtin;
+package go;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
 
 /**
- * Package builtin provides Go's predeclared identifiers.
- * In Go, these items are not actually in package builtin,
+ * Package Builtin provides Go's predeclared identifiers.
+ * In Go, these items are not actually in package Builtin,
  * they are just documented to be there.
  *
  * Usage:
- * {@code import static go.builtin.Builtin.*}
+ * {@code import static go.Builtin.Builtin.*}
+ *
+ * Note: all implementations are pure Java
  *
  * Differences with Go:
  * * len function: // TODOC: fix links, format code etc.
@@ -32,7 +35,7 @@ public final class Builtin {
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(boolean[] dst, boolean[] src) {
+  public static int copy(final boolean[] dst, final boolean[] src) {
     return copyInternalImpl(dst, 0, dst.length, src, 0, src.length);
   }
 
@@ -43,14 +46,14 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(boolean[] dst, int dstBegin, boolean[] src) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, 0, src.length);
+  public static int copy(final boolean[] dst, int dstLow, final boolean[] src) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, 0, src.length);
   }
 
   /**
@@ -60,69 +63,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(boolean[] dst, int dstBegin, int dstEnd, boolean[] src) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, 0, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(boolean[] dst, boolean[] src, int srcBegin) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(boolean[] dst, int dstBegin, boolean[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(boolean[] dst, int dstBegin, int dstEnd, boolean[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, src.length);
+  public static int copy(final boolean[] dst, int dstLow, int dstHigh, final boolean[] src) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, 0, src.length);
   }
 
   /**
@@ -133,14 +82,13 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(boolean[] dst, boolean[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final boolean[] dst, final boolean[] src, int srcLow) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -150,16 +98,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(boolean[] dst, int dstBegin, boolean[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final boolean[] dst, int dstLow, final boolean[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -169,17 +116,16 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(boolean[] dst, int dstBegin, int dstEnd, boolean[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, srcEnd);
+  public static int copy(final boolean[] dst, int dstLow, int dstHigh, final boolean[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, src.length);
   }
 
   /**
@@ -190,11 +136,68 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(byte[] dst, byte[] src) {
+  public static int copy(final boolean[] dst, final boolean[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final boolean[] dst, int dstLow, final boolean[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final boolean[] dst, int dstLow, int dstHigh, final boolean[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param src source array
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final byte[] dst, final byte[] src) {
     return copyInternalImpl(dst, 0, dst.length, src, 0, src.length);
   }
 
@@ -205,14 +208,14 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(byte[] dst, int dstBegin, byte[] src) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, 0, src.length);
+  public static int copy(final byte[] dst, int dstLow, final byte[] src) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, 0, src.length);
   }
 
   /**
@@ -222,69 +225,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(byte[] dst, int dstBegin, int dstEnd, byte[] src) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, 0, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(byte[] dst, byte[] src, int srcBegin) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(byte[] dst, int dstBegin, byte[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(byte[] dst, int dstBegin, int dstEnd, byte[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, src.length);
+  public static int copy(final byte[] dst, int dstLow, int dstHigh, final byte[] src) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, 0, src.length);
   }
 
   /**
@@ -295,14 +244,13 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(byte[] dst, byte[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final byte[] dst, final byte[] src, int srcLow) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -312,16 +260,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(byte[] dst, int dstBegin, byte[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final byte[] dst, int dstLow, final byte[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -331,17 +278,16 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(byte[] dst, int dstBegin, int dstEnd, byte[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, srcEnd);
+  public static int copy(final byte[] dst, int dstLow, int dstHigh, final byte[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, src.length);
   }
 
   /**
@@ -352,11 +298,68 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, char[] src) {
+  public static int copy(final byte[] dst, final byte[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final byte[] dst, int dstLow, final byte[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final byte[] dst, int dstLow, int dstHigh, final byte[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param src source array
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final char[] dst, final char[] src) {
     return copyInternalImpl(dst, 0, dst.length, src, 0, src.length);
   }
 
@@ -367,14 +370,14 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, int dstBegin, char[] src) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, 0, src.length);
+  public static int copy(final char[] dst, int dstLow, final char[] src) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, 0, src.length);
   }
 
   /**
@@ -384,69 +387,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, int dstBegin, int dstEnd, char[] src) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, 0, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(char[] dst, char[] src, int srcBegin) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(char[] dst, int dstBegin, char[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(char[] dst, int dstBegin, int dstEnd, char[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, src.length);
+  public static int copy(final char[] dst, int dstLow, int dstHigh, final char[] src) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, 0, src.length);
   }
 
   /**
@@ -457,14 +406,13 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, char[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final char[] dst, final char[] src, int srcLow) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -474,16 +422,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, int dstBegin, char[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final char[] dst, int dstLow, final char[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -493,17 +440,16 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, int dstBegin, int dstEnd, char[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, srcEnd);
+  public static int copy(final char[] dst, int dstLow, int dstHigh, final char[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, src.length);
   }
 
   /**
@@ -514,11 +460,68 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(short[] dst, short[] src) {
+  public static int copy(final char[] dst, final char[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final char[] dst, int dstLow, final char[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final char[] dst, int dstLow, int dstHigh, final char[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param src source array
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final short[] dst, final short[] src) {
     return copyInternalImpl(dst, 0, dst.length, src, 0, src.length);
   }
 
@@ -529,14 +532,14 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(short[] dst, int dstBegin, short[] src) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, 0, src.length);
+  public static int copy(final short[] dst, int dstLow, final short[] src) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, 0, src.length);
   }
 
   /**
@@ -546,69 +549,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(short[] dst, int dstBegin, int dstEnd, short[] src) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, 0, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(short[] dst, short[] src, int srcBegin) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(short[] dst, int dstBegin, short[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(short[] dst, int dstBegin, int dstEnd, short[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, src.length);
+  public static int copy(final short[] dst, int dstLow, int dstHigh, final short[] src) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, 0, src.length);
   }
 
   /**
@@ -619,14 +568,13 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(short[] dst, short[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final short[] dst, final short[] src, int srcLow) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -636,16 +584,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(short[] dst, int dstBegin, short[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final short[] dst, int dstLow, final short[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -655,17 +602,16 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(short[] dst, int dstBegin, int dstEnd, short[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, srcEnd);
+  public static int copy(final short[] dst, int dstLow, int dstHigh, final short[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, src.length);
   }
 
   /**
@@ -676,11 +622,68 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(int[] dst, int[] src) {
+  public static int copy(final short[] dst, final short[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final short[] dst, int dstLow, final short[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final short[] dst, int dstLow, int dstHigh, final short[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param src source array
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final int[] dst, final int[] src) {
     return copyInternalImpl(dst, 0, dst.length, src, 0, src.length);
   }
 
@@ -691,14 +694,14 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(int[] dst, int dstBegin, int[] src) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, 0, src.length);
+  public static int copy(final int[] dst, int dstLow, final int[] src) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, 0, src.length);
   }
 
   /**
@@ -708,69 +711,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(int[] dst, int dstBegin, int dstEnd, int[] src) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, 0, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(int[] dst, int[] src, int srcBegin) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(int[] dst, int dstBegin, int[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(int[] dst, int dstBegin, int dstEnd, int[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, src.length);
+  public static int copy(final int[] dst, int dstLow, int dstHigh, final int[] src) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, 0, src.length);
   }
 
   /**
@@ -781,14 +730,13 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(int[] dst, int[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final int[] dst, final int[] src, int srcLow) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -798,16 +746,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(int[] dst, int dstBegin, int[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final int[] dst, int dstLow, final int[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -817,17 +764,16 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(int[] dst, int dstBegin, int dstEnd, int[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, srcEnd);
+  public static int copy(final int[] dst, int dstLow, int dstHigh, final int[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, src.length);
   }
 
   /**
@@ -838,11 +784,68 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(long[] dst, long[] src) {
+  public static int copy(final int[] dst, final int[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final int[] dst, int dstLow, final int[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final int[] dst, int dstLow, int dstHigh, final int[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param src source array
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final long[] dst, final long[] src) {
     return copyInternalImpl(dst, 0, dst.length, src, 0, src.length);
   }
 
@@ -853,14 +856,14 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(long[] dst, int dstBegin, long[] src) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, 0, src.length);
+  public static int copy(final long[] dst, int dstLow, final long[] src) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, 0, src.length);
   }
 
   /**
@@ -870,69 +873,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(long[] dst, int dstBegin, int dstEnd, long[] src) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, 0, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(long[] dst, long[] src, int srcBegin) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(long[] dst, int dstBegin, long[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(long[] dst, int dstBegin, int dstEnd, long[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, src.length);
+  public static int copy(final long[] dst, int dstLow, int dstHigh, final long[] src) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, 0, src.length);
   }
 
   /**
@@ -943,14 +892,13 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(long[] dst, long[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final long[] dst, final long[] src, int srcLow) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -960,16 +908,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(long[] dst, int dstBegin, long[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final long[] dst, int dstLow, final long[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -979,17 +926,16 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(long[] dst, int dstBegin, int dstEnd, long[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, srcEnd);
+  public static int copy(final long[] dst, int dstLow, int dstHigh, final long[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, src.length);
   }
 
   /**
@@ -1000,11 +946,68 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(float[] dst, float[] src) {
+  public static int copy(final long[] dst, final long[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final long[] dst, int dstLow, final long[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final long[] dst, int dstLow, int dstHigh, final long[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param src source array
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final float[] dst, final float[] src) {
     return copyInternalImpl(dst, 0, dst.length, src, 0, src.length);
   }
 
@@ -1015,14 +1018,14 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(float[] dst, int dstBegin, float[] src) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, 0, src.length);
+  public static int copy(final float[] dst, int dstLow, final float[] src) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, 0, src.length);
   }
 
   /**
@@ -1032,69 +1035,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(float[] dst, int dstBegin, int dstEnd, float[] src) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, 0, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(float[] dst, float[] src, int srcBegin) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(float[] dst, int dstBegin, float[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(float[] dst, int dstBegin, int dstEnd, float[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, src.length);
+  public static int copy(final float[] dst, int dstLow, int dstHigh, final float[] src) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, 0, src.length);
   }
 
   /**
@@ -1105,14 +1054,13 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(float[] dst, float[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final float[] dst, final float[] src, int srcLow) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -1122,16 +1070,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(float[] dst, int dstBegin, float[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final float[] dst, int dstLow, final float[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -1141,17 +1088,16 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(float[] dst, int dstBegin, int dstEnd, float[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, srcEnd);
+  public static int copy(final float[] dst, int dstLow, int dstHigh, final float[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, src.length);
   }
 
   /**
@@ -1162,11 +1108,68 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(double[] dst, double[] src) {
+  public static int copy(final float[] dst, final float[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final float[] dst, int dstLow, final float[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final float[] dst, int dstLow, int dstHigh, final float[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param src source array
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final double[] dst, final double[] src) {
     return copyInternalImpl(dst, 0, dst.length, src, 0, src.length);
   }
 
@@ -1177,14 +1180,14 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(double[] dst, int dstBegin, double[] src) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, 0, src.length);
+  public static int copy(final double[] dst, int dstLow, final double[] src) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, 0, src.length);
   }
 
   /**
@@ -1194,69 +1197,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(double[] dst, int dstBegin, int dstEnd, double[] src) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, 0, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(double[] dst, double[] src, int srcBegin) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(double[] dst, int dstBegin, double[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(double[] dst, int dstBegin, int dstEnd, double[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, src.length);
+  public static int copy(final double[] dst, int dstLow, int dstHigh, final double[] src) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, 0, src.length);
   }
 
   /**
@@ -1267,14 +1216,13 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(double[] dst, double[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final double[] dst, final double[] src, int srcLow) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -1284,16 +1232,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(double[] dst, int dstBegin, double[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final double[] dst, int dstLow, final double[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -1303,17 +1250,16 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(double[] dst, int dstBegin, int dstEnd, double[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, srcEnd);
+  public static int copy(final double[] dst, int dstLow, int dstHigh, final double[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, src.length);
   }
 
   /**
@@ -1324,11 +1270,68 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(Object[] dst, Object[] src) {
+  public static int copy(final double[] dst, final double[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final double[] dst, int dstLow, final double[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final double[] dst, int dstLow, int dstHigh, final double[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param src source array
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final Object[] dst, final Object[] src) {
     return copyInternalImpl(dst, 0, dst.length, src, 0, src.length);
   }
 
@@ -1339,14 +1342,14 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(Object[] dst, int dstBegin, Object[] src) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, 0, src.length);
+  public static int copy(final Object[] dst, int dstLow, final Object[] src) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, 0, src.length);
   }
 
   /**
@@ -1356,69 +1359,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(Object[] dst, int dstBegin, int dstEnd, Object[] src) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, 0, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(Object[] dst, Object[] src, int srcBegin) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(Object[] dst, int dstBegin, Object[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, src.length);
-  }
-
-  /**
-   * The copy built-in function copies elements from a source slice into a
-   * destination slice. The source and destination may overlap. Copy
-   * returns the number of elements copied, which will be the minimum of
-   * len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(Object[] dst, int dstBegin, int dstEnd, Object[] src, int srcBegin) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, src.length);
+  public static int copy(final Object[] dst, int dstLow, int dstHigh, final Object[] src) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, 0, src.length);
   }
 
   /**
@@ -1429,14 +1378,13 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(Object[] dst, Object[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, 0, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final Object[] dst, final Object[] src, int srcLow) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -1446,16 +1394,15 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(Object[] dst, int dstBegin, Object[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final Object[] dst, int dstLow, final Object[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, src.length);
   }
 
   /**
@@ -1465,22 +1412,78 @@ public final class Builtin {
    * len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(Object[] dst, int dstBegin, int dstEnd, Object[] src, int srcBegin, int srcEnd) {
-    return copyInternalImpl(dst, dstBegin, dstEnd, src, srcBegin, srcEnd);
+  public static int copy(final Object[] dst, int dstLow, int dstHigh, final Object[] src, int srcLow) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, src.length);
   }
 
-  private static int copyInternalImpl(Object dst, int dstBegin, int dstEnd, Object src, int srcBegin, int srcEnd) {
-    int length = Math.min(dstEnd - dstBegin, srcEnd - srcBegin);
-    System.arraycopy(src, srcBegin, dst, dstBegin, length);
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final Object[] dst, final Object[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, 0, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final Object[] dst, int dstLow, final Object[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * The copy built-in function copies elements from a source slice into a
+   * destination slice. The source and destination may overlap. Copy
+   * returns the number of elements copied, which will be the minimum of
+   * len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final Object[] dst, int dstLow, int dstHigh, final Object[] src, int srcLow, int srcHigh) {
+    return copyInternalImpl(dst, dstLow, dstHigh, src, srcLow, srcHigh);
+  }
+
+  private static int copyInternalImpl(Object dst, int dstLow, int dstHigh, Object src, int srcLow, int srcHigh) {
+    int length = Math.min(dstHigh - dstLow, srcHigh - srcLow);
+    System.arraycopy(src, srcLow, dst, dstLow, length);
     return length;
   }
 
@@ -1495,7 +1498,7 @@ public final class Builtin {
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, String src) {
+  public static int copy(final char[] dst, final String src) {
     return copy(dst, 0, dst.length, src, 0, src.length());
   }
 
@@ -1505,14 +1508,14 @@ public final class Builtin {
    * copied, which will be the minimum of len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, int dstBegin, String src) {
-    return copy(dst, dstBegin, dst.length, src, 0, src.length());
+  public static int copy(final char[] dst, int dstLow, final String src) {
+    return copy(dst, dstLow, dst.length, src, 0, src.length());
   }
 
   /**
@@ -1521,66 +1524,15 @@ public final class Builtin {
    * copied, which will be the minimum of len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, int dstBegin, int dstEnd, String src) {
-    return copy(dst, dstBegin, dstEnd, src, 0, src.length());
-  }
-
-  /**
-   * A special case of copy built-in function that copies chars from a
-   * string to a slice of chars. Copy returns the number of elements
-   * copied, which will be the minimum of len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(char[] dst, String src, int srcBegin) {
-    return copy(dst, 0, dst.length, src, srcBegin, src.length());
-  }
-
-  /**
-   * A special case of copy built-in function that copies chars from a
-   * string to a slice of chars. Copy returns the number of elements
-   * copied, which will be the minimum of len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(char[] dst, int dstBegin, String src, int srcBegin) {
-    return copy(dst, dstBegin, dst.length, src, srcBegin, src.length());
-  }
-
-  /**
-   * A special case of copy built-in function that copies chars from a
-   * string to a slice of chars. Copy returns the number of elements
-   * copied, which will be the minimum of len(src) and len(dst).
-   *
-   * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
-   * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @return the number of elements copied
-   * @throws NullPointerException if src or dst is null
-   * @throws IndexOutOfBoundsException if array bounds are out of range
-   */
-  public static int copy(char[] dst, int dstBegin, int dstEnd, String src, int srcBegin) {
-    return copy(dst, dstBegin, dstEnd, src, srcBegin, src.length());
+  public static int copy(final char[] dst, int dstLow, int dstHigh, final String src) {
+    return copy(dst, dstLow, dstHigh, src, 0, src.length());
   }
 
   /**
@@ -1590,14 +1542,13 @@ public final class Builtin {
    *
    * @param dst destination array
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, String src, int srcBegin, int srcEnd) {
-    return copy(dst, 0, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final char[] dst, final String src, int srcLow) {
+    return copy(dst, 0, dst.length, src, srcLow, src.length());
   }
 
   /**
@@ -1606,16 +1557,15 @@ public final class Builtin {
    * copied, which will be the minimum of len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
+   * @param dstLow destination slice starting index, including
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, int dstBegin, String src, int srcBegin, int srcEnd) {
-    return copy(dst, dstBegin, dst.length, src, srcBegin, srcEnd);
+  public static int copy(final char[] dst, int dstLow, final String src, int srcLow) {
+    return copy(dst, dstLow, dst.length, src, srcLow, src.length());
   }
 
   /**
@@ -1624,18 +1574,71 @@ public final class Builtin {
    * copied, which will be the minimum of len(src) and len(dst).
    *
    * @param dst destination array
-   * @param dstBegin destination slice starting index, including
-   * @param dstEnd destination slice ending index, excluding
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
    * @param src source array
-   * @param srcBegin source slice starting index, including
-   * @param srcEnd source slice ending index, excluding
+   * @param srcLow source slice starting index, including
    * @return the number of elements copied
    * @throws NullPointerException if src or dst is null
    * @throws IndexOutOfBoundsException if array bounds are out of range
    */
-  public static int copy(char[] dst, int dstBegin, int dstEnd, String src, int srcBegin, int srcEnd) {
-    int length = Math.min(dstEnd - dstBegin, srcEnd - srcBegin);
-    src.getChars(srcBegin, srcBegin + length, dst, dstBegin);
+  public static int copy(final char[] dst, int dstLow, int dstHigh, final String src, int srcLow) {
+    return copy(dst, dstLow, dstHigh, src, srcLow, src.length());
+  }
+
+  /**
+   * A special case of copy built-in function that copies chars from a
+   * string to a slice of chars. Copy returns the number of elements
+   * copied, which will be the minimum of len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final char[] dst, final String src, int srcLow, int srcHigh) {
+    return copy(dst, 0, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * A special case of copy built-in function that copies chars from a
+   * string to a slice of chars. Copy returns the number of elements
+   * copied, which will be the minimum of len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final char[] dst, int dstLow, final String src, int srcLow, int srcHigh) {
+    return copy(dst, dstLow, dst.length, src, srcLow, srcHigh);
+  }
+
+  /**
+   * A special case of copy built-in function that copies chars from a
+   * string to a slice of chars. Copy returns the number of elements
+   * copied, which will be the minimum of len(src) and len(dst).
+   *
+   * @param dst destination array
+   * @param dstLow destination slice starting index, including
+   * @param dstHigh destination slice ending index, excluding
+   * @param src source array
+   * @param srcLow source slice starting index, including
+   * @param srcHigh source slice ending index, excluding
+   * @return the number of elements copied
+   * @throws NullPointerException if src or dst is null
+   * @throws IndexOutOfBoundsException if array bounds are out of range
+   */
+  public static int copy(final char[] dst, int dstLow, int dstHigh, final String src, int srcLow, int srcHigh) {
+    int length = Math.min(dstHigh - dstLow, srcHigh - srcLow);
+    src.getChars(srcLow, srcLow + length, dst, dstLow);
     return length;
   }
 
@@ -1646,7 +1649,7 @@ public final class Builtin {
    * @return The number of elements in v
    * @throws NullPointerException If v is null
    */
-  public static int len(boolean[] v) {
+  public static int len(final boolean[] v) {
     return v.length;
   }
 
@@ -1657,7 +1660,7 @@ public final class Builtin {
    * @return The number of elements in v
    * @throws NullPointerException If v is null
    */
-  public static int len(byte[] v) {
+  public static int len(final byte[] v) {
     return v.length;
   }
 
@@ -1668,7 +1671,7 @@ public final class Builtin {
    * @return The number of elements in v
    * @throws NullPointerException If v is null
    */
-  public static int len(char[] v) {
+  public static int len(final char[] v) {
     return v.length;
   }
 
@@ -1679,7 +1682,7 @@ public final class Builtin {
    * @return The number of elements in v
    * @throws NullPointerException If v is null
    */
-  public static int len(short[] v) {
+  public static int len(final short[] v) {
     return v.length;
   }
 
@@ -1690,7 +1693,7 @@ public final class Builtin {
    * @return The number of elements in v
    * @throws NullPointerException If v is null
    */
-  public static int len(int[] v) {
+  public static int len(final int[] v) {
     return v.length;
   }
 
@@ -1701,7 +1704,7 @@ public final class Builtin {
    * @return The number of elements in v
    * @throws NullPointerException If v is null
    */
-  public static int len(long[] v) {
+  public static int len(final long[] v) {
     return v.length;
   }
 
@@ -1712,7 +1715,7 @@ public final class Builtin {
    * @return The number of elements in v
    * @throws NullPointerException If v is null
    */
-  public static int len(float[] v) {
+  public static int len(final float[] v) {
     return v.length;
   }
 
@@ -1723,7 +1726,7 @@ public final class Builtin {
    * @return The number of elements in v
    * @throws NullPointerException If v is null
    */
-  public static int len(double[] v) {
+  public static int len(final double[] v) {
     return v.length;
   }
 
@@ -1734,7 +1737,7 @@ public final class Builtin {
    * @return The number of elements in v
    * @throws NullPointerException If v is null
    */
-  public static int len(Object[] v) {
+  public static int len(final Object[] v) {
     return v.length;
   }
 
@@ -1767,6 +1770,251 @@ public final class Builtin {
    */
   public static int len(String v) {
     return v.length();
+  }
+
+  /**
+   * The make built-in function allocates and initializes an object of type
+   * slice, map, or chan (only). Like new, the first argument is a type, not a
+   * value. Unlike new, make's return type is the same as the type of its
+   * argument, not a pointer to it. The specification of the result depends on
+   * the type:
+   * 	Slice: The size specifies the length. The capacity of the slice is
+   * 	equal to its length. A second integer argument may be provided to
+   * 	specify a different capacity; it must be no smaller than the
+   * 	length. For example, final make([]int, 0, 10) allocates an underlying array
+   * 	of size 10 and returns a slice of length 0 and capacity 10 that is
+   * 	backed by this underlying array.
+   * 	Map: An empty map is allocated with enough space to hold the
+   * 	specified number of elements. The size may be omitted, in which case
+   * 	a small starting size is allocated.
+   * 	Channel: The channel's buffer is initialized with the specified
+   * 	buffer capacity. If zero, or the size is omitted, the channel is
+   * 	unbuffered.
+   *
+   * Java implementation notices:
+   * *  For primitives, function doesn't accept Type arguments. Instead, function name changed
+   * *  Version with two integers is not provided
+  */
+  public static boolean[] makebooleans(int size) {
+    return new boolean[size];
+  }
+
+  /**
+   * The make built-in function allocates and initializes an object of type
+   * slice, map, or chan (only). Like new, the first argument is a type, not a
+   * value. Unlike new, make's return type is the same as the type of its
+   * argument, not a pointer to it. The specification of the result depends on
+   * the type:
+   * 	Slice: The size specifies the length. The capacity of the slice is
+   * 	equal to its length. A second integer argument may be provided to
+   * 	specify a different capacity; it must be no smaller than the
+   * 	length. For example, final make([]int, 0, 10) allocates an underlying array
+   * 	of size 10 and returns a slice of length 0 and capacity 10 that is
+   * 	backed by this underlying array.
+   * 	Map: An empty map is allocated with enough space to hold the
+   * 	specified number of elements. The size may be omitted, in which case
+   * 	a small starting size is allocated.
+   * 	Channel: The channel's buffer is initialized with the specified
+   * 	buffer capacity. If zero, or the size is omitted, the channel is
+   * 	unbuffered.
+   *
+   * Java implementation notices:
+   * *  For primitives, function doesn't accept Type arguments. Instead, function name changed
+   * *  Version with two integers is not provided
+   */
+  public static byte[] makebytes(int size) {
+    return new byte[size];
+  }
+
+  /**
+   * The make built-in function allocates and initializes an object of type
+   * slice, map, or chan (only). Like new, the first argument is a type, not a
+   * value. Unlike new, make's return type is the same as the type of its
+   * argument, not a pointer to it. The specification of the result depends on
+   * the type:
+   * 	Slice: The size specifies the length. The capacity of the slice is
+   * 	equal to its length. A second integer argument may be provided to
+   * 	specify a different capacity; it must be no smaller than the
+   * 	length. For example, final make([]int, 0, 10) allocates an underlying array
+   * 	of size 10 and returns a slice of length 0 and capacity 10 that is
+   * 	backed by this underlying array.
+   * 	Map: An empty map is allocated with enough space to hold the
+   * 	specified number of elements. The size may be omitted, in which case
+   * 	a small starting size is allocated.
+   * 	Channel: The channel's buffer is initialized with the specified
+   * 	buffer capacity. If zero, or the size is omitted, the channel is
+   * 	unbuffered.
+   *
+   * Java implementation notices:
+   * *  For primitives, function doesn't accept Type arguments. Instead, function name changed
+   * *  Version with two integers is not provided
+   */
+  public static char[] makechars(int size) {
+    return new char[size];
+  }
+
+  /**
+   * The make built-in function allocates and initializes an object of type
+   * slice, map, or chan (only). Like new, the first argument is a type, not a
+   * value. Unlike new, make's return type is the same as the type of its
+   * argument, not a pointer to it. The specification of the result depends on
+   * the type:
+   * 	Slice: The size specifies the length. The capacity of the slice is
+   * 	equal to its length. A second integer argument may be provided to
+   * 	specify a different capacity; it must be no smaller than the
+   * 	length. For example, final make([]int, 0, 10) allocates an underlying array
+   * 	of size 10 and returns a slice of length 0 and capacity 10 that is
+   * 	backed by this underlying array.
+   * 	Map: An empty map is allocated with enough space to hold the
+   * 	specified number of elements. The size may be omitted, in which case
+   * 	a small starting size is allocated.
+   * 	Channel: The channel's buffer is initialized with the specified
+   * 	buffer capacity. If zero, or the size is omitted, the channel is
+   * 	unbuffered.
+   *
+   * Java implementation notices:
+   * *  For primitives, function doesn't accept Type arguments. Instead, function name changed
+   * *  Version with two integers is not provided
+   */
+  public static short[] makeshorts(int size) {
+    return new short[size];
+  }
+
+  /**
+   * The make built-in function allocates and initializes an object of type
+   * slice, map, or chan (only). Like new, the first argument is a type, not a
+   * value. Unlike new, make's return type is the same as the type of its
+   * argument, not a pointer to it. The specification of the result depends on
+   * the type:
+   * 	Slice: The size specifies the length. The capacity of the slice is
+   * 	equal to its length. A second integer argument may be provided to
+   * 	specify a different capacity; it must be no smaller than the
+   * 	length. For example, final make([]int, 0, 10) allocates an underlying array
+   * 	of size 10 and returns a slice of length 0 and capacity 10 that is
+   * 	backed by this underlying array.
+   * 	Map: An empty map is allocated with enough space to hold the
+   * 	specified number of elements. The size may be omitted, in which case
+   * 	a small starting size is allocated.
+   * 	Channel: The channel's buffer is initialized with the specified
+   * 	buffer capacity. If zero, or the size is omitted, the channel is
+   * 	unbuffered.
+   *
+   * Java implementation notices:
+   * *  For primitives, function doesn't accept Type arguments. Instead, function name changed
+   * *  Version with two integers is not provided
+   */
+  public static int[] makeints(int size) {
+    return new int[size];
+  }
+
+  /**
+   * The make built-in function allocates and initializes an object of type
+   * slice, map, or chan (only). Like new, the first argument is a type, not a
+   * value. Unlike new, make's return type is the same as the type of its
+   * argument, not a pointer to it. The specification of the result depends on
+   * the type:
+   * 	Slice: The size specifies the length. The capacity of the slice is
+   * 	equal to its length. A second integer argument may be provided to
+   * 	specify a different capacity; it must be no smaller than the
+   * 	length. For example, final make([]int, 0, 10) allocates an underlying array
+   * 	of size 10 and returns a slice of length 0 and capacity 10 that is
+   * 	backed by this underlying array.
+   * 	Map: An empty map is allocated with enough space to hold the
+   * 	specified number of elements. The size may be omitted, in which case
+   * 	a small starting size is allocated.
+   * 	Channel: The channel's buffer is initialized with the specified
+   * 	buffer capacity. If zero, or the size is omitted, the channel is
+   * 	unbuffered.
+   *
+   * Java implementation notices:
+   * *  For primitives, function doesn't accept Type arguments. Instead, function name changed
+   * *  Version with two integers is not provided
+   */
+  public static long[] makelongs(int size) {
+    return new long[size];
+  }
+
+  /**
+   * The make built-in function allocates and initializes an object of type
+   * slice, map, or chan (only). Like new, the first argument is a type, not a
+   * value. Unlike new, make's return type is the same as the type of its
+   * argument, not a pointer to it. The specification of the result depends on
+   * the type:
+   * 	Slice: The size specifies the length. The capacity of the slice is
+   * 	equal to its length. A second integer argument may be provided to
+   * 	specify a different capacity; it must be no smaller than the
+   * 	length. For example, final make([]int, 0, 10) allocates an underlying array
+   * 	of size 10 and returns a slice of length 0 and capacity 10 that is
+   * 	backed by this underlying array.
+   * 	Map: An empty map is allocated with enough space to hold the
+   * 	specified number of elements. The size may be omitted, in which case
+   * 	a small starting size is allocated.
+   * 	Channel: The channel's buffer is initialized with the specified
+   * 	buffer capacity. If zero, or the size is omitted, the channel is
+   * 	unbuffered.
+   *
+   * Java implementation notices:
+   * *  For primitives, function doesn't accept Type arguments. Instead, function name changed
+   * *  Version with two integers is not provided
+   */
+  public static float[] makefloats(int size) {
+    return new float[size];
+  }
+
+  /**
+   * The make built-in function allocates and initializes an object of type
+   * slice, map, or chan (only). Like new, the first argument is a type, not a
+   * value. Unlike new, make's return type is the same as the type of its
+   * argument, not a pointer to it. The specification of the result depends on
+   * the type:
+   * 	Slice: The size specifies the length. The capacity of the slice is
+   * 	equal to its length. A second integer argument may be provided to
+   * 	specify a different capacity; it must be no smaller than the
+   * 	length. For example, final make([]int, 0, 10) allocates an underlying array
+   * 	of size 10 and returns a slice of length 0 and capacity 10 that is
+   * 	backed by this underlying array.
+   * 	Map: An empty map is allocated with enough space to hold the
+   * 	specified number of elements. The size may be omitted, in which case
+   * 	a small starting size is allocated.
+   * 	Channel: The channel's buffer is initialized with the specified
+   * 	buffer capacity. If zero, or the size is omitted, the channel is
+   * 	unbuffered.
+   *
+   * Java implementation notices:
+   * *  For primitives, function doesn't accept Type arguments. Instead, function name changed
+   * *  Version with two integers is not provided
+   */
+  public static double[] makedoubles(int size) {
+    return new double[size];
+  }
+
+  /**
+   * The make built-in function allocates and initializes an object of type
+   * slice, map, or chan (only). Like new, the first argument is a type, not a
+   * value. Unlike new, make's return type is the same as the type of its
+   * argument, not a pointer to it. The specification of the result depends on
+   * the type:
+   * 	Slice: The size specifies the length. The capacity of the slice is
+   * 	equal to its length. A second integer argument may be provided to
+   * 	specify a different capacity; it must be no smaller than the
+   * 	length. For example, final make([]int, 0, 10) allocates an underlying array
+   * 	of size 10 and returns a slice of length 0 and capacity 10 that is
+   * 	backed by this underlying array.
+   * 	Map: An empty map is allocated with enough space to hold the
+   * 	specified number of elements. The size may be omitted, in which case
+   * 	a small starting size is allocated.
+   * 	Channel: The channel's buffer is initialized with the specified
+   * 	buffer capacity. If zero, or the size is omitted, the channel is
+   * 	unbuffered.
+   *
+   * Java implementation notices:
+   * *  For primitives, function doesn't accept Type arguments. Instead, function name changed
+   * *  Version with two integers is not provided
+   */
+  public static <T> T[] make(Class<T> t, int size) {
+    @SuppressWarnings("unchecked")
+    final T[] a = final (final T[]) Array.newInstance(t, size);
+    return a;
   }
 
   private Builtin() {}

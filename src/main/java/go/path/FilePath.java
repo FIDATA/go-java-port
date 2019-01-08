@@ -1,21 +1,78 @@
-package go.path.filepath;
+package go.path;
 
-import static go.builtin.Builtin.*;
-import static go.builtin.Conversions.*;
-import static go.runtime.Runtime.GoOS.*;
-
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
-import go.os.Os;
-import go.strings.Strings;
-import go.strings.utf8.Utf8;
-import go.runtime.Runtime;
-import org.apache.commons.lang3.StringUtils;
+import static go.Builtin.*;
+import static go.Conversions.*;
+import static go.Runtime.GoOS.*;
+import com.google.common.collect.ImmutableList;
+import go.Os;
+import go.Sort;
+import go.Strings;
+import go.strings.Utf8;
+import go.Runtime;
 import org.immutables.value.Value;
-
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.List;
 
-final class FilePath {
+public final class FilePath {
   public static final char SEPARATOR = Os.PATH_SEPARATOR;
+
+  /**
+   * A lazybuf is a lazily constructed path buffer.
+   * It supports append, reading previously appended bytes,
+   * and retrieving the final string. It does not allocate a buffer
+   * to hold the output until that output diverges from s.
+   */
+  // TOTHINK: Javafy: add getAt, Iterable, toString ?
+  private static class Lazybuf {
+    private final int pathLen; // without volLen
+    private char[] buf = null;
+    public int w; // low, without volLen
+    private final String volAndPath;
+    private final int volLen;
+
+    public Lazybuf(String volAndPath, int volLen) {
+      this.volAndPath = volAndPath;
+      this.volLen = volLen;
+      pathLen = len(volAndPath) - volLen;
+      w = 0;
+    }
+
+    private char pathChar(int i) {
+      return volAndPath.charAt(volLen + i);
+    }
+
+    public char index(int i) {
+      if (buf != null) {
+        return buf[i];
+      }
+      return pathChar(i);
+    }
+
+    public void append(char c) {
+      if (buf == null) {
+        if (w < pathLen && pathChar(w) == c) {
+          w++;
+          return;
+        }
+        buf = makechars(pathLen);
+        copy(buf, volAndPath, volLen, volLen + w);
+      }
+      buf[w] = c;
+      w++;
+    }
+
+    public String string() {
+      if (buf == null) {
+        return volAndPath.substring(0, volLen + w);
+      }
+      // return volAndPath.substring(0, volLen) + string(buf, 0, w);
+      char[] result = makechars(volLen + w);
+      copy(result, volAndPath, 0, volLen);
+      copy(result, volLen, buf, 0, w);
+      return string(result);
+    }
+  }
 
   /**
    * Clean returns the shortest path name equivalent to path
@@ -42,74 +99,76 @@ final class FilePath {
    * Getting Dot-Dot Right,''
    * https://9p.io/sys/doc/lexnames.html
    */
-  public static String clean(String path) {
-    String originalPath = path;
-    int volLen = volumeNameLen(path);
-    path = path[volLen:]
-    if path == "" {
-      if volLen > 1 && originalPath[1] != ':' {
+  // DONE
+  public static String clean(final String path) {
+    final int volLen = volumeNameLen(path);
+    int r = volLen; // pathLow
+    final int n = len(path); // pathLen
+    if (r >= n) {
+      if (volLen > 1 && path.charAt(1) != ':') {
         // should be UNC
-        return fromSlash(originalPath);
+        return fromSlash(path);
       }
-      return originalPath + ".";
+      return path + ".";
     }
-    boolean rooted = Os.isPathSeparator(path.charAt(0));
+    final boolean rooted = Os.isPathSeparator(path.charAt(r));
 
     // Invariants:
-    //	reading from path; r is index of next byte to process.
+    //	reading from path; r is index of next char to process.
     //	writing to buf; w is index of next byte to write.
     //	dotdot is index in buf where .. must stop, either because
     //		it is the leading slash or it is a leading ../../.. prefix.
-    int n = len(path);
-    int out = lazybuf{path: path, volAndPath: originalPath, volLen: volLen};
-    int r = 0;
-    int dotdot = 0;
+    final Lazybuf out = new Lazybuf(path, volLen);
+    int dotdot;
     if (rooted) {
-      out.append(Separator);
-      r, dotdot = 1, 1
+      out.append(SEPARATOR);
+      r++;
+      dotdot = 1;
+    } else {
+      dotdot = 0;
     }
 
     while (r < n) {
-      if (Os.isPathSeparator(path[r])) {
+      if (Os.isPathSeparator(path.charAt(r))) {
         // empty path element
-        r++
-      } else if (path[r] == '.' && (r+1 == n || os.IsPathSeparator(path[r+1]))) {
+        r++;
+      } else if (path.charAt(r) == '.' && (r + 1 == n || Os.isPathSeparator(path.charAt(r + 1)))) {
         // . element
-        r++
-      } else if (path[r] == '.' && path[r+1] == '.' && (r+2 == n || os.IsPathSeparator(path[r+2]))) {
+        r++;
+      } else if (path.charAt(r) == '.' && path.charAt(r + 1) == '.' && (r + 2 == n || Os.isPathSeparator(path.charAt(r + 2)))) {
         // .. element: remove to last separator
         r += 2;
         if (out.w > dotdot) {
           // can backtrack
-          out.w--
-          for out.w > dotdot && !os.IsPathSeparator(out.index(out.w)) {
-            out.w--
+          out.w--;
+          while (out.w > dotdot && !Os.isPathSeparator(out.index(out.w))) {
+            out.w--;
           }
         } else if (!rooted) {
           // cannot backtrack, but not rooted, so append .. element.
           if (out.w > 0) {
-            out.append(Separator)
+            out.append(SEPARATOR);
           }
-          out.append('.')
-          out.append('.')
-          dotdot = out.w
+          out.append('.');
+          out.append('.');
+          dotdot = out.w;
         }
       } else {
         // real path element.
         // add slash if needed
         if (rooted && out.w != 1 || !rooted && out.w != 0) {
-          out.append(Separator)
+          out.append(SEPARATOR);
         }
         // copy element
-        for (); r < n && !os.IsPathSeparator(path[r]); r++) {
-          out.append(path[r])
+        for (; r < n && !Os.isPathSeparator(path.charAt(r)); r++) {
+          out.append(path.charAt(r));
         }
       }
     }
 
     // Turn empty string into "."
     if (out.w == 0) {
-      out.append('.')
+      out.append('.');
     }
 
     return fromSlash(out.string());
@@ -123,10 +182,12 @@ final class FilePath {
    * @param path
    * @return
    */
+  // DONE
   public static String toSlash(String path) {
     if (SEPARATOR == '/') {
       return path;
     }
+    // TODO: replace over char array would be more efficient
     return Strings.replace(path, string(SEPARATOR), "/", -1);
   }
 
@@ -135,19 +196,21 @@ final class FilePath {
    * in path with a separator character. Multiple slashes are replaced
    * by multiple separators.
    */
+  // DONE
   public static String fromSlash(String path) {
     if (SEPARATOR == '/') {
       return path;
     }
+    // TODO: replace over char array would be more efficient
     return Strings.replace(path, "/", string(SEPARATOR), -1);
   }
 
-  public static class ErrBadPattern extends RuntimeException { // TOTHINK
+  public static class ErrBadPattern extends /*PatternSyntaxException*/ IllegalArgumentException {
     ErrBadPattern() {
       this(null);
     }
-    ErrBadPattern(Throwable cause) {
-      super("syntax error in pattern", cause);
+    ErrBadPattern(/*String pattern, int index,*/ Throwable cause) {
+      super("syntax error in pattern" /*, pattern, index*/, cause);
     }
   }
 
@@ -180,41 +243,46 @@ final class FilePath {
    * @param name
    * @return
    */
-  public boolean match(String pattern, String name) {
+  public boolean match(final String pattern, final String name) {
+    int patternLow = 0;
+    int nameLow = 0;
+    final int patternHigh = len(pattern);
+    final int nameHigh = len(name);
     pattern:
-    while (len(pattern) > 0) {
-      ScanChunkResult scanChunkResult = scanChunk(pattern);
-      boolean star = scanChunkResult.getStar();
-      String chunk = scanChunkResult.getChunk();
-      pattern = scanChunkResult.getRest();
-      if (star && chunk.isEmpty()) {
+    while (patternLow < patternHigh) {
+      final ScanChunkResult scanChunkResult = scanChunk(pattern, patternLow);
+      final boolean star = scanChunkResult.getStar();
+      final int chunkLow = patternLow;
+      final int chunkHigh = scanChunkResult.getChunkHigh();
+      if (star && chunkLow == chunkHigh) {
         // Trailing * matches rest of string unless it has a /.
-        return !Strings.contains(name, string(SEPARATOR));
+        return !Strings.contains(name, nameLow, string(SEPARATOR));
       }
+      patternLow = scanChunkResult.getRestLow();
       // Look for match at current position.
-      MatchChunkResult matchChunkResult = matchChunk(chunk, name);
-      String t = matchChunkResult.getRest();
+      MatchChunkResult matchChunkResult = matchChunk(pattern, chunkLow, chunkHigh, name, nameLow);
+      int t = matchChunkResult.getRestLow();
       boolean ok = matchChunkResult.getOk();
       // if we're the last chunk, make sure we've exhausted the name
       // otherwise we'll give a false result even if we could still match
       // using the star
-      if (ok && (len(t) == 0 || len(pattern) > 0)) {
-        name = t;
+      if (ok && (t == nameHigh || patternLow < patternHigh)) {
+        nameLow = t;
         continue;
       }
       if (star) {
         // Look for match skipping i+1 bytes.
         // Cannot skip /.
-        for (int i = 0; i < len(name) && name.charAt(i) != SEPARATOR; i++) {
-          matchChunkResult = matchChunk(chunk, name.substring(i + 1));
-          t = matchChunkResult.getRest();
+        for (int i = nameLow; i < nameHigh && name.charAt(i) != SEPARATOR; i++) {
+          matchChunkResult = matchChunk(pattern, chunkLow, chunkHigh, name, i + 1);
+          t = matchChunkResult.getRestLow();
           ok = matchChunkResult.getOk();
           if (ok) {
             // if we're the last chunk, make sure we exhausted the name
-            if (len(pattern) == 0 && len(t) > 0) {
+            if (patternLow == patternHigh && t < nameHigh) {
               continue;
             }
-            name = t;
+            nameLow = t;
             continue pattern;
           }
         }
@@ -224,14 +292,15 @@ final class FilePath {
     return len(name) == 0;
   }
 
-  @Value.Immutable
-  private static abstract class ScanChunkResult {
+  @Value.Immutable(builder = false)
+  private abstract static class ScanChunkResult {
     @Value.Parameter
-    abstract boolean getStar();
+    public abstract boolean getStar();
     @Value.Parameter
-    abstract String getChunk();
-    @Value.Parameter
-    abstract String getRest();
+    public abstract int getChunkHigh();
+    public final int getRestLow() {
+      return getChunkHigh();
+    };
   }
 
   /**
@@ -241,22 +310,22 @@ final class FilePath {
    * @param pattern
    * @return Tuple of (star, chunk, rest)
    */
-  private ScanChunkResult scanChunk(String pattern) {
-    int i = 0;
+  // DONE
+  private ScanChunkResult scanChunk(final String pattern, int i /*patternLow*/) {
+    final int patternHigh = len(pattern);
     boolean star = false;
-    int length = len(pattern);
-    while (i < length && pattern.charAt(i) == '*') {
+    while (i < patternHigh && pattern.charAt(i) == '*') {
       i++;
       star = true;
     }
     boolean inrange = false;
     scan:
-    for(; i < length; i++) {
+    for(; i < patternHigh; i++) {
       switch (pattern.charAt(i)) {
         case '\\':
           if (Runtime.GOOS != WINDOWS) {
             // error check handled in matchChunk: bad pattern.
-            if (i + 1 < length) {
+            if (i + 1 < patternHigh) {
               i++;
             }
           }
@@ -274,15 +343,15 @@ final class FilePath {
           break;
       }
     }
-    return ImmutableScanChunkResult.of(star, pattern.substring(0, i), pattern.substring(i));
+    return ImmutableScanChunkResult.of(star, i);
   }
 
-  @Value.Immutable
+  @Value.Immutable(builder = false)
   private abstract static class MatchChunkResult {
     @Value.Parameter
-    abstract String getRest();
+    public abstract int getRestLow();
     @Value.Parameter
-    abstract boolean getOk();
+    public abstract boolean getOk();
   }
 
   /**
@@ -295,53 +364,56 @@ final class FilePath {
    * @return Tuple of (rest, ok)
    * @throws ErrBadPattern
    */
-  private MatchChunkResult matchChunk(String chunk, String s) {
-    int chunkStart = 0;
-    int chunkLength = len(chunk);
-    int sStart = 0;
-    int sLength = len(s);
+  // DONE
+  private MatchChunkResult matchChunk(final String chunk, int chunkLow, final int chunkHigh, final String s, int sLow) {
+    final int sHigh = len(s);
     Utf8.DecodeRuneInStringResult decodeRuneInStringResult;
     int n;
+    boolean ok = true;
+    // TOTHINK: put ok check in while condition
     return_loop:
-    while (chunkStart < chunkLength) {
-      if (sStart == sLength) {
+    while (chunkLow < chunkHigh) {
+      if (sLow == sHigh) {
+        ok = false;
         break return_loop;
       }
-      switch (chunk.charAt(0)) {
+      switch (chunk.charAt(chunkLow)) {
         case '[':
           // character class
-          decodeRuneInStringResult = Utf8.decodeRuneInString(s, sStart);
+          decodeRuneInStringResult = Utf8.decodeRuneInString(s, sLow);
           int r = decodeRuneInStringResult.getR();
           n = decodeRuneInStringResult.getSize();
-          sStart += n;
-          chunkLength += 1;
+          sLow += n;
+          chunkLow++;
           // We can't end right after '[', we're expecting at least
           // a closing bracket and possibly a caret.
-          if (chunkStart == chunkLength) {
+          if (chunkLow == chunkHigh) {
             throw new ErrBadPattern();
           }
           // possibly negated
-          boolean negated = chunk.charAt(0) == '^';
+          boolean negated = chunk.charAt(chunkLow) == '^';
           if (negated) {
-            chunk = chunk.substring(1);
+            chunkLow++;
           }
           // parse all ranges
           boolean match = false;
           int nrange = 0;
           while (true) {
-            if (len(chunk) > 0 && chunk.charAt(0) == ']' && nrange > 0){
-              chunk = chunk.substring(1);
+            if (chunkLow < chunkHigh && chunk.charAt(chunkLow) == ']' && nrange > 0){
+              chunkLow++;
               break;
             }
-            lo;
-            hi rune;
-            GetEscResult getEscResult = getEsc(chunk, chunkStart);
-
-            hi = lo
-            if (chunk.charAt(0) == '-') {
-              if hi, chunk, err = getEsc(chunk[1:]); err != nil {
-                break return_loop;
-              }
+            final int lo;
+            final int hi;
+            GetEscResult getEscResult = getEsc(chunk, chunkLow, chunkHigh);
+            lo = getEscResult.getR();
+            chunkLow = getEscResult.getNChunkLow();
+            if (chunk.charAt(chunkLow) == '-') {
+              getEscResult = getEsc(chunk, chunkLow + 1, chunkHigh);
+              hi = getEscResult.getR();
+              chunkLow = getEscResult.getNChunkLow();
+            } else {
+              hi = lo;
             }
             if (lo <= r && r <= hi) {
               match = true;
@@ -349,45 +421,48 @@ final class FilePath {
             nrange++;
           }
           if (match == negated) {
+            ok = false;
             break return_loop;
           }
           break;
 
         case '?':
-          if (s.charAt(sStart) == SEPARATOR) {
+          if (s.charAt(sLow) == SEPARATOR) {
+            ok = false;
             break return_loop;
           }
-          n = Utf8.decodeRuneInString(s, sStart).getSize();
-          sStart += n;
-          chunkStart++;
+          n = Utf8.decodeRuneInString(s, sLow).getSize();
+          sLow += n;
+          chunkLow++;
           break;
 
         case '\\':
           if (Runtime.GOOS != WINDOWS) {
-            chunkStart++;
-            if (chunkStart == chunkLength) {
+            chunkLow++;
+            if (chunkLow == chunkHigh) {
               throw new ErrBadPattern();
             }
           }
           // fallthrough
 
         default:
-          if (chunk.charAt(chunkStart) != s.charAt(sStart)) {
+          if (chunk.charAt(chunkLow) != s.charAt(sLow)) {
+            ok = false;
             break return_loop;
           }
-          sStart++;
-          chunkStart++;
+          sLow++;
+          chunkLow++;
       }
     } // TODO: Ok is not needed?
-    return ImmutableMatchChunkResult.of(s.substring(sStart), true);
+    return ImmutableMatchChunkResult.of(sLow, ok);
   }
 
-  @Value.Immutable
-  private static abstract class GetEscResult {
+  @Value.Immutable(builder = false)
+  private abstract static class GetEscResult {
     @Value.Parameter
-    abstract int getR();
+    public abstract int getR();
     @Value.Parameter
-    abstract int getNChunk();
+    public abstract int getNChunkLow();
   }
 
   /**
@@ -396,51 +471,40 @@ final class FilePath {
    * Returns size of jump instead of actual new string.
    *
    * @param chunk
+   * @param chunkLow
+   * @param chunkHigh
    * @return (r, nchunk)
    * @throws ErrBadPattern
    */
-  private static GetEscResult getEsc(String chunk) {
-    return getEsc(chunk, 0);
-  }
-
-  /**
-   * getEsc gets a possibly-escaped character from chunk, for a character class.
-   *
-   * Returns size of jump instead of actual new string.
-   *
-   * @param chunk
-   * @param start
-   * @return (r, nchunk)
-   * @throws ErrBadPattern
-   */
-  private static GetEscResult getEsc(String chunk, int start) {
-    if (start >= len(chunk) || chunk.charAt(start) == '-' || chunk.charAt(start) == ']') {
+  // DONE
+  private static GetEscResult getEsc(final String chunk, int chunkLow, final int chunkHigh) {
+    if (chunkLow >= chunkHigh || chunk.charAt(chunkLow) == '-' || chunk.charAt(chunkLow) == ']') {
       throw new ErrBadPattern();
     }
-    if (chunk.charAt(start) == '\\' && Runtime.GOOS != WINDOWS) {
-      start++;
-      if (len(chunk) < start) {
+    if (chunk.charAt(chunkLow) == '\\' && Runtime.GOOS != WINDOWS) {
+      chunkLow++;
+      if (chunkLow >= chunkHigh) {
         throw new ErrBadPattern();
       }
     }
     Utf8.DecodeRuneInStringResult decodeRuneInStringResult;
     try {
-      decodeRuneInStringResult = Utf8.decodeRuneInString(chunk, start);
+      decodeRuneInStringResult = Utf8.decodeRuneInString(chunk, chunkLow);
     } catch (Utf8.RuneError e) {
       throw new ErrBadPattern(e);
     }
-    start += decodeRuneInStringResult.getSize();
-    if (start >= len(chunk)) {
+    chunkLow += decodeRuneInStringResult.getSize();
+    if (chunkLow >= chunkHigh) {
       throw new ErrBadPattern();
     }
-    return GetEscResultImmutable.of(decodeRuneInStringResult.getR(), start);
+    return GetEscResultImmutable.of(decodeRuneInStringResult.getR(), chunkLow);
   }
 
   /**
    * glob returns the names of all files matching pattern or nil
    * if there is no matching file. The syntax of patterns is the same
    * as in Match. The pattern may describe hierarchical names such as
-   * /usr/*&#47;bin/ed(assuming the Separator is '/').
+   * /usr/*&#47;bin/ed(assuming the SEPARATOR is '/').
    *
    * Glob ignores file system errors such as I/O errors reading directories.
    * The only possible returned error is ErrBadPattern, when pattern
@@ -448,44 +512,49 @@ final class FilePath {
    *
    * @param pattern
    * @return
+   * @throws ErrBadPattern
+   * @throws SecurityException - If a security manager exists
+   * and its SecurityManager.checkRead(String) method denies read access to the directory
    */
-  public String[] glob(String pattern) {
-    if !hasMeta(pattern) {
-      if _, err = os.Lstat(pattern); err != nil {
-        return nil, nil
+  public List<String> glob(String pattern) {
+    if (!hasMeta(pattern)) {
+      // Pure Java implementation
+      if (!new File(pattern).exists()) {
+        return null;
       }
-      return []string{pattern}, nil
+      return ImmutableList.of(pattern);
     }
 
-    dir, file := Split(pattern)
-    volumeLen := 0
+    SplitResult splitResult = split(pattern);
+    String dir = splitResult.getDir();
+    String file = splitResult.getFile();
+    int volumeLen;
     if (Runtime.GOOS == WINDOWS) {
-      volumeLen, dir = cleanGlobPathWindows(dir)
+      CleanGlobPathWindowsResult cleanGlobPathWindowsResult = cleanGlobPathWindows(dir);
+      volumeLen = cleanGlobPathWindowsResult.getPrefixLen();
+      dir = cleanGlobPathWindowsResult.getCleaned();
     } else {
-      dir = cleanGlobPath(dir)
+      volumeLen = 0;
+      dir = cleanGlobPath(dir);
     }
 
-    if !hasMeta(dir[volumeLen:]) {
-      return glob(dir, file, nil)
+    ImmutableList.Builder<String> matches = ImmutableList.builder();
+
+    if (!hasMeta(dir.substring(volumeLen))) {
+      glob(dir, file, matches);
+      return matches.build();
     }
 
     // Prevent infinite recursion. See issue 15879.
-    if dir == pattern {
+    if (dir == pattern) {
       throw new ErrBadPattern();
     }
 
-    var m []string
-    m, err = Glob(dir)
-    if err != nil {
-      return
+    List<String> m = glob(dir);
+    for (String d: m) {
+      glob(d, file, matches);
     }
-    for _, d := range m {
-      matches, err = glob(d, file, matches)
-      if err != nil {
-        return;
-      }
-    }
-    return;
+    return matches.build();
   }
 
   /**
@@ -505,12 +574,12 @@ final class FilePath {
     }
   }
 
-  @Value.Immutable
+  @Value.Immutable(builder = false)
   private abstract static class CleanGlobPathWindowsResult {
     @Value.Parameter
-    abstract int getPrefixLen();
+    public abstract int getPrefixLen();
     @Value.Parameter
-    abstract String getCleaned();
+    public abstract String getCleaned();
   }
 
   /**
@@ -546,26 +615,28 @@ final class FilePath {
    * @param dir
    * @param pattern
    * @param matches
+   * @throws SecurityException - If a security manager exists
+   * and its SecurityManager.checkRead(String) method denies read access to the directory
    * @return
    */
-  private void glob(String dir, String pattern, List<String> matches) {
-    fi = os.Stat(dir);
-    if (!fi.IsDir()) {
+  private void glob(String dir, String pattern, ImmutableList.Builder<String> matches) {
+    // Pure Java implementation
+    File d = new File(dir);
+    if (!d.isDirectory()) {
       return;
     }
-    d = os.Open(dir);
-    defer d.Close();
-
-    List<String> names = d.Readdirnames(-1);
-    sort.Strings(names);
-
-    for (String n: names) {
-      boolean matched = match(pattern, n);
-      if (matched) {
-        matches.add(join(dir, n));
+    String[] names = d.list(
+      new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String n) {
+          return match(pattern, n);
+        }
       }
+    );
+    Sort.strings(names);
+    for (String n: names) {
+      matches.add(join(dir, n));
     }
-    return;
   }
 
   private static final String MAGIC_CHARS = Runtime.GOOS == WINDOWS ? "*?[" : "*?[\\";
@@ -584,33 +655,29 @@ final class FilePath {
   /**
    * Join joins any number of path elements into a single path, adding
    * a Separator if necessary. Join calls Clean on the result; in particular,
-   * all empty strings are ignored.
+   * all empty Strings are ignored.
    * On Windows, the result is a UNC path if and only if the first path
    * element is a UNC path.
    *
    * @param elem
    * @return
    */
+  // DONE
   public static String join(String... elem) {
-    int length = elem.length;
-    if (Runtime.GOOS == WINDOWS) {
-      for (int i = 0; i < length; i ++) {
-        String e = elem[i];
-        if (!e.isEmpty()) {
+    int elemHigh = len(elem);
+    for (int i = 0; i < elemHigh; i++) {
+      String e = elem[i];
+      if (!e.isEmpty()) {
+        if (Runtime.GOOS == WINDOWS) {
           return joinNonEmpty(elem, i);
+        } else {
+          return clean(Strings.join(elem, i, string(SEPARATOR)));
         }
       }
-      return "";
-    } else {
-      for (int i = 0; i < length; i ++) {
-        String e = elem[i];
-        if (!e.isEmpty()) {
-          return Clean(Strings.join(elem, i, string(SEPARATOR)));
-        }
-      }
-      return "";
     }
+    return "";
   }
+
 
   /**
    * joinNonEmpty is like join, but it assumes that the first element is non-empty.
@@ -618,48 +685,40 @@ final class FilePath {
    * @param elem
    * @return
    */
-  private static String joinNonEmpty(String[] elem) {
-    return joinNonEmpty(elem, 0);
-  }
-  /**
-   * joinNonEmpty is like join, but it assumes that the first element is non-empty.
-   *
-   * @param elem
-   * @return
-   */
-  private static String joinNonEmpty(String[] elem, int start) {
-    if (len(elem[start]) == 2 && elem[start].charAt(1) == ':') {
+  // DONE
+  private static String joinNonEmpty(String[] elem, int elemLow) {
+    if (len(elem[elemLow]) == 2 && elem[elemLow].charAt(1) == ':') {
       // First element is drive letter without terminating slash.
       // Keep path relative to current directory on that drive.
-      return Clean(elem[start] + Strings.join(elem, start + 1, string(SEPARATOR)));
+      return clean(elem[elemLow] + Strings.join(elem, elemLow + 1, string(SEPARATOR)));
     }
     // The following logic prevents Join from inadvertently creating a
     // UNC path on Windows. Unless the first element is a UNC path, Join
     // shouldn't create a UNC path. See golang.org/issue/9167.
-    String p = Clean(Strings.join(elem, start, string(SEPARATOR)));
+    String p = clean(Strings.join(elem, elemLow, string(SEPARATOR)));
     if (!isUNC(p)) {
       return p;
     }
     // p == UNC only allowed when the first element is a UNC path.
-    String head = Clean(elem[start]);
+    String head = clean(elem[elemLow]);
     if (isUNC(head)) {
       return p;
     }
     // head + tail == UNC, but joining two non-UNC paths should not result
     // in a UNC path. Undo creation of UNC path.
-    String tail = Clean(Strings.join(elem, start + 1, string(SEPARATOR)));
+    String tail = clean(Strings.join(elem, elemLow + 1, string(SEPARATOR)));
     if (head.charAt(len(head) - 1) == SEPARATOR) {
       return head + tail;
     }
     return head + SEPARATOR + tail;
   }
 
-  @Value.Immutable
-  public static abstract class SplitResult {
+  @Value.Immutable(builder = false)
+  public abstract static class SplitResult {
     @Value.Parameter
-    abstract String getDir();
+    public abstract String getDir();
     @Value.Parameter
-    abstract String getFile();
+    public abstract String getFile();
   }
 
   /**
@@ -673,39 +732,28 @@ final class FilePath {
    * @return (dir, file)
    */
   public static SplitResult split(String path) {
-    String vol = volumeName(path);
+    int volNameLen = volumeNameLen(path);
     int i = len(path) - 1;
-    while (i >= len(vol) && !Os.isPathSeparator(path.charAt(i))) {
+    while (i >= volNameLen && !Os.isPathSeparator(path.charAt(i))) {
       i--;
     }
     return ImmutableSplitResult.of(path.substring(0, i + 1), path.substring(i + 1));
   }
 
   /**
-   * VolumeName returns leading volume name.
-   * Given "C:\foo\bar" it returns "C:" on Windows.
+   * VolumeName returns length of the leading volume name on Windows.
+   * Given "C:\foo\bar" it returns 2 on Windows.
    * Given "\\host\share\foo" it returns "\\host\share".
-   * On other platforms it returns "".
+   * On other platforms it returns 0.
+   *
+   * Note: it is not exported in Go. It is made public in Java port for convenience,
+   * to avoid unnecessary String creation
    *
    * @param path
    * @return
    */
-  public static String volumeName(String path) {
-    return path.substring(0, volumeNameLen(path));
-  }
-
-  private static boolean isSlash(char c) {
-    return c == '\\' || c == '/';
-  }
-
-  /**
-   * volumeNameLen returns length of the leading volume name on Windows.
-   * It returns 0 elsewhere.
-   *
-   * @param path
-   * @return
-   */
-  private static int volumeNameLen(String path) {
+  // DONE
+  public static int volumeNameLen(String path) {
     if (Runtime.GOOS == WINDOWS) {
       if (len(path) < 2) {
         return 0;
@@ -744,11 +792,16 @@ final class FilePath {
     return 0;
   }
 
+  private static boolean isSlash(char c) {
+    return c == '\\' || c == '/';
+  }
+
   /**
    * isUNC reports whether path is a UNC path.
    * @param path
    * @return
    */
+  // DONE
   private static boolean isUNC(String path) {
     return volumeNameLen(path) > 2;
   }

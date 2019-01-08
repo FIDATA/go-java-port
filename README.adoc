@@ -54,7 +54,7 @@ TODO: maven coordinates
 --
 [source,java]
 ----
-import static go.builtin.Builtin.*;
+import static go.Builtin.*;
 ----
 
 This will add built-in Go predeclared functions.
@@ -77,7 +77,7 @@ becomes the following in Java:
 
 [source,java]
 ----
-import go.os.Os;
+import go.Os;
 ----
 --
 

@@ -1,11 +1,9 @@
-package go.strings;
+package go;
 
+import static go.Builtin.*;
 import org.apache.commons.lang3.StringUtils;
-
 import java.util.Objects;
 import java.util.StringJoiner;
-
-import static go.builtin.Builtin.*;
 
 public final class Strings {
   /**
@@ -16,7 +14,19 @@ public final class Strings {
    * @return
    */
   public static boolean contains(String s, String substr) {
-    return s.contains(substr);
+    // return s.contains(substr);
+    return contains(s, 0, substr);
+  }
+
+  /**
+   * Contains reports whether substr is within s.
+   *
+   * @param s
+   * @param substr
+   * @return
+   */
+  public static boolean contains(String s, int sLow, String substr) {
+    return s.indexOf(substr, sLow) > -1;
   }
 
   /**

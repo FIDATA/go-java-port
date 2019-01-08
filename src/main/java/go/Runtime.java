@@ -1,4 +1,4 @@
-package go.runtime;
+package go;
 
 import org.apache.commons.lang3.SystemUtils;
 

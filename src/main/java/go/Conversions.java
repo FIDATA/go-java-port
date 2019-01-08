@@ -1,7 +1,11 @@
-package go.builtin;
+package go;
 
 import com.google.common.primitives.UnsignedInteger;
+import org.joou.UInteger;
 
+/**
+ * Note: all implementations are pure Java
+ */
 public final class Conversions {
   /**
    * Converting a signed or unsigned integer value to a string type yields a string
@@ -35,6 +39,18 @@ public final class Conversions {
    * @param i
    * @return
    */
+  public static String string(UInteger i) {
+    return new String(Character.toChars(i.intValue()));
+  }
+
+  /**
+   * Converting a signed or unsigned integer value to a string type yields a string
+   * containing the UTF-8 representation of the integer.
+   * TODO: Values outside the range of valid Unicode code points are converted to "\uFFFD".
+   *
+   * @param i
+   * @return
+   */
   public static String string(UnsignedInteger i) {
     return new String(Character.toChars(i.intValue()));
   }
@@ -45,7 +61,7 @@ public final class Conversions {
    * @param c
    * @return
    */
-  public static String string(char[] c) {
+  public static String string(final char[] c) {
     return string(c, 0, c.length);
   }
 
@@ -55,7 +71,7 @@ public final class Conversions {
    * @param c
    * @return
    */
-  public static String string(char[] c, int beginIndex) {
+  public static String string(final char[] c, int beginIndex) {
     return string(c, beginIndex, c.length);
   }
 
@@ -65,40 +81,40 @@ public final class Conversions {
    * @param c
    * @return
    */
-  public static String string(char[] c, int beginIndex, int endIndex) {
+  public static String string(final char[] c, int beginIndex, int endIndex) {
     return new String(c, beginIndex, endIndex - beginIndex);
   }
 
   /**
    * Converting a slice of runes to a string type yields a string
-   * that is the concatenation of the individual rune values converted to strings.
+   * that is the concatenation of the individual rune values converted to Strings.
    *
    * @param c
    * @return
    */
-  public static String string(int[] c) {
+  public static String string(final int[] c) {
     return string(c, 0, c.length);
   }
 
   /**
    * Converting a slice of runes to a string type yields a string
-   * that is the concatenation of the individual rune values converted to strings.
+   * that is the concatenation of the individual rune values converted to Strings.
    *
    * @param c
    * @return
    */
-  public static String string(int[] c, int beginIndex) {
+  public static String string(final int[] c, int beginIndex) {
     return string(c, beginIndex, c.length);
   }
 
   /**
    * Converting a slice of runes to a string type yields a string
-   * that is the concatenation of the individual rune values converted to strings.
+   * that is the concatenation of the individual rune values converted to Strings.
    *
    * @param c
    * @return
    */
-  public static String string(int[] c, int beginIndex, int endIndex) {
+  public static String string(final int[] c, int beginIndex, int endIndex) {
     return new String(c, beginIndex, endIndex - beginIndex);
   }
 
@@ -109,7 +125,7 @@ public final class Conversions {
    * @param s
    * @return
    */
-  public static char[] bytes(String s) {
+  public static final char[] bytes(final String s) {
     return s.toCharArray();
   }
 
@@ -120,7 +136,7 @@ public final class Conversions {
    * @param s
    * @return
    */
-  public static int[] runes(String s) {
+  public static final int[] runes(final String s) {
     return s.codePoints().toArray();
   }
 
