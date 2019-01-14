@@ -72,6 +72,7 @@ public final class Strings {
    * sep is placed between elements in the resulting string.
    */
   public static String join(String[] a, int start, int end, String sep) {
+    // Code copied from java.lang.String#join(CharSequence, CharSequence...)
     Objects.requireNonNull(sep);
     Objects.requireNonNull(a);
     // Number of elements not likely worth Arrays.stream overhead.

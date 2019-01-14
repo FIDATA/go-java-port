@@ -1,7 +1,10 @@
 package go;
 
 import com.google.common.primitives.UnsignedInteger;
+import org.joou.UByte;
 import org.joou.UInteger;
+import org.joou.UNumber;
+import org.joou.UShort;
 
 /**
  * Note: all implementations are pure Java
@@ -125,7 +128,7 @@ public final class Conversions {
    * @param s
    * @return
    */
-  public static final char[] bytes(final String s) {
+  public static char[] bytes(final String s) {
     return s.toCharArray();
   }
 
@@ -136,8 +139,36 @@ public final class Conversions {
    * @param s
    * @return
    */
-  public static final int[] runes(final String s) {
+  public static int[] runes(final String s) {
     return s.codePoints().toArray();
+  }
+
+  public static long int64(byte i) {
+    return i;
+  }
+
+  public static long int64(UByte i) {
+    return i.longValue();
+  }
+
+  public static long int64(short i) {
+    return i;
+  }
+
+  public static long int64(UShort i) {
+    return i.longValue();
+  }
+
+  public static long int64(int i) {
+    return i;
+  }
+
+  public static long int64(UInteger i) {
+    return i.longValue();
+  }
+
+  public static long int64(UnsignedInteger i) {
+    return i.longValue();
   }
 
   private Conversions() {}

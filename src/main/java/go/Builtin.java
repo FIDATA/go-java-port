@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * Package Builtin provides Go's predeclared identifiers.
- * In Go, these items are not actually in package Builtin,
+ * In Go, these items are not actually in package builtin,
  * they are just documented to be there.
  *
  * Usage:

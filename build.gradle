@@ -5,28 +5,41 @@
  *
  * This file is part of go-java-port.
  *
- * This library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation. Basil Peace designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Basil Peace in the LICENSE file that accompanied this code.
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along
+ * with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+/*buildscript {
+  repositories {
+    mavenLocal()
+  }
+  dependencies {
+    classpath 'me.champeau.gradle:jmh-gradle-plugin:0.4.8-SNAPSHOT'
+  }
+}*/
 plugins {
   id 'org.fidata.project' version '6.0.0-gradle-5-0-SNAPSHOT'
   id 'org.fidata.project.java' version '6.0.0-gradle-5-0-SNAPSHOT'
+  id 'me.champeau.gradle.jmh' version '0.4.8'
 }
+// plugins.apply 'me.champeau.gradle.jmh'
 
 description = 'Some of core Go packages ported to Java'
 tags.set(['go', 'golang', 'java', 'port']) // TODO
 //noinspection GroovyUnusedAssignment
-license = 'Apache-2.0'
+license = '	GPL-2.0-only' // TODO: WITH Classpath-exception-2.0
 //noinspection GroovyUnusedAssignment
 publicReleases = true
 contacts {
@@ -43,7 +56,40 @@ dependencies {
   api group: 'org.jooq', name: 'joou-java-6', version: '[0, 1['
   api group: 'com.google.guava', name: 'guava', version: '27.0-jre'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: '[3, 4['
+  testImplementation localGroovy()
+  testImplementation group: 'org.hamcrest', name: 'hamcrest-library', version: '[1, 2['
+  testImplementation group: 'pl.pragmatists', name: 'JUnitParams', version: '[1, 2['
 }
+
+repositories {
+  mavenLocal()
+  /*
+   * Not supported yet.
+   * See https://github.com/gradle/gradle/issues/8191
+   * <grv87 2019-01-09>
+   */
+ /* {
+    mavenContent {
+      snapshotsOnly()
+    }
+  }*/
+}
+
+jmh {
+  // include = ['Benchmark*']
+  // benchmarkMode = ['AverageTime'] // Default in Go
+  includeTests = false
+  // https://bugs.openjdk.java.net/browse/CODETOOLS-7902106
+  // https://github.com/melix/jmh-gradle-plugin/issues/103
+  jvmArgsAppend = ['-Djmh.separateClasspathJAR=true']
+  // verbosity = 'EXTRA' TODO
+  jmhVersion = '1.22-SNAPSHOT'
+  forceGC = true
+  iterations = 2
+  fork = 1
+  warmupIterations = 1
+}
+configurations.getByName('jmh').incoming.beforeResolve { dependencies.each { it.status = 'integration' } }
 
 wrapper {
   gradleVersion = '5.1'

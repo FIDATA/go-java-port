@@ -1,4 +1,4 @@
-package go.strings;
+package go.unicode;
 
 import org.immutables.value.Value;
 
@@ -68,8 +68,13 @@ public final class Utf8 {
    * @exception  RuneError
    */
   public static DecodeRuneInStringResult decodeRuneInString(String s, int index) {
+    // Code copied from java.lang.Character#codePointAt(char[], int, int)
+    // and java.lang.Character#codePointAtImpl(char[], int, int)
+    // and changed to throw RuneError
     int limit = s.length();
-    if ((index < 0) || (index >= limit)) {
+    if (index == limit) {
+      throw new RuneError();
+    } else if ((index < 0) || (index > limit)) {
       throw new StringIndexOutOfBoundsException(index);
     }
     char c1 = s.charAt(index);

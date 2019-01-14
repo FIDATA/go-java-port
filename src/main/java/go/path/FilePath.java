@@ -8,7 +8,7 @@ import go.Conversions;
 import go.Os;
 import go.Sort;
 import go.Strings;
-import go.strings.Utf8;
+import go.unicode.Utf8;
 import go.Runtime;
 import org.immutables.value.Value;
 import java.io.File;
@@ -290,7 +290,7 @@ public final class FilePath {
       }
       return false;
     }
-    return len(name) == 0;
+    return nameLow == nameHigh;
   }
 
   @Value.Immutable(builder = false)
