@@ -39,7 +39,7 @@ plugins {
 description = 'Some of core Go packages ported to Java'
 tags.set(['go', 'golang', 'java', 'port']) // TODO
 //noinspection GroovyUnusedAssignment
-license = '	GPL-2.0-only' // TODO: WITH Classpath-exception-2.0
+// TODO: license = '	GPL-2.0-only' // TODO: WITH Classpath-exception-2.0
 //noinspection GroovyUnusedAssignment
 publicReleases = true
 contacts {
@@ -59,6 +59,7 @@ dependencies {
   testImplementation localGroovy()
   testImplementation group: 'org.hamcrest', name: 'hamcrest-library', version: '[1, 2['
   testImplementation group: 'pl.pragmatists', name: 'JUnitParams', version: '[1, 2['
+  testImplementation group: 'com.github.stefanbirkner', name: 'system-rules', version: '[1, 2['
 }
 
 repositories {

@@ -3,14 +3,14 @@ package go.unicode;
 import org.immutables.value.Value;
 
 /**
- * In Go, package Utf8 implements functions and constants to support text encoded in
+ * In Go, package Utf16 implements functions and constants to support text encoded in
  * UTF-8. It includes functions to translate between runes and UTF-8 byte sequences.
- * package Utf8
+ * package Utf16
  *
  * Since JVM stores Strings in UTF-16, methods, accepting or returning String,
  * actually works with UTF-16, but provide the same functionality.
  */
-public final class Utf8 {
+public final class Utf16 {
   /**
    * The "error" Rune
    */
@@ -127,5 +127,5 @@ public final class Utf8 {
     return ImmutableDecodeRuneInStringResult.of((int)c1, 1);
   }
 
-  private Utf8() {};
+  private Utf16() {};
 }

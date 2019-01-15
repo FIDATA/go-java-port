@@ -1,4 +1,4 @@
 package go.unicode
 
-class Utf8Test {
+class Utf16Test {
 }

@@ -8,7 +8,7 @@ import go.Conversions;
 import go.Os;
 import go.Sort;
 import go.Strings;
-import go.unicode.Utf8;
+import go.unicode.Utf16;
 import go.Runtime;
 import org.immutables.value.Value;
 import java.io.File;
@@ -244,7 +244,7 @@ public final class FilePath {
    * @param name
    * @return
    */
-  public boolean match(final String pattern, final String name) {
+  public static boolean match(final String pattern, final String name) {
     int patternLow = 0;
     int nameLow = 0;
     final int patternHigh = len(pattern);
@@ -368,7 +368,7 @@ public final class FilePath {
   // DONE
   private MatchChunkResult matchChunk(final String chunk, int chunkLow, final int chunkHigh, final String s, int sLow) {
     final int sHigh = len(s);
-    Utf8.DecodeRuneInStringResult decodeRuneInStringResult;
+    Utf16.DecodeRuneInStringResult decodeRuneInStringResult;
     int n;
     boolean ok = true;
     // TOTHINK: put ok check in while condition
@@ -381,7 +381,7 @@ public final class FilePath {
       switch (chunk.charAt(chunkLow)) {
         case '[':
           // character class
-          decodeRuneInStringResult = Utf8.decodeRuneInString(s, sLow);
+          decodeRuneInStringResult = Utf16.decodeRuneInString(s, sLow);
           int r = decodeRuneInStringResult.getR();
           n = decodeRuneInStringResult.getSize();
           sLow += n;
@@ -432,7 +432,7 @@ public final class FilePath {
             ok = false;
             break return_loop;
           }
-          n = Utf8.decodeRuneInString(s, sLow).getSize();
+          n = Utf16.decodeRuneInString(s, sLow).getSize();
           sLow += n;
           chunkLow++;
           break;
@@ -488,10 +488,10 @@ public final class FilePath {
         throw new ErrBadPattern();
       }
     }
-    Utf8.DecodeRuneInStringResult decodeRuneInStringResult;
+    Utf16.DecodeRuneInStringResult decodeRuneInStringResult;
     try {
-      decodeRuneInStringResult = Utf8.decodeRuneInString(chunk, chunkLow);
-    } catch (Utf8.RuneError e) {
+      decodeRuneInStringResult = Utf16.decodeRuneInString(chunk, chunkLow);
+    } catch (Utf16.RuneError e) {
       throw new ErrBadPattern(e);
     }
     chunkLow += decodeRuneInStringResult.getSize();
@@ -517,7 +517,7 @@ public final class FilePath {
    * @throws SecurityException - If a security manager exists
    * and its SecurityManager.checkRead(String) method denies read access to the directory
    */
-  public List<String> glob(String pattern) {
+  public static List<String> glob(String pattern) {
     if (!hasMeta(pattern)) {
       // Pure Java implementation
       if (!new File(pattern).exists()) {
@@ -649,7 +649,7 @@ public final class FilePath {
    * @param path
    * @return
    */
-  private boolean hasMeta(String path) {
+  private static boolean hasMeta(String path) {
     return Strings.containsAny(path, MAGIC_CHARS);
   }
 
