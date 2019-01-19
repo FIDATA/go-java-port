@@ -1,6 +1,5 @@
 package go;
 
-import static go.Builtin.*;
 import org.apache.commons.lang3.StringUtils;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -19,7 +18,7 @@ public final class Strings {
    * sep is placed between elements in the resulting string.
    */
   public static String join(String[] a, int start, String sep) {
-    return join(a, start, len(a), sep);
+    return join(a, start, a.length, sep);
   }
 
   /**

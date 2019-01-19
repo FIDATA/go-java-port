@@ -1,18 +1,16 @@
 package go.path;
 
-import static go.Builtin.*;
-import static go.Conversions.*;
 import static go.Runtime.GoOS.*;
 import com.google.common.collect.ImmutableList;
-import go.Conversions;
 import go.Os;
-import go.Sort;
 import go.Strings;
 import go.unicode.Utf16;
 import go.Runtime;
+import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Arrays;
 import java.util.List;
 
 public final class FilePath {
@@ -35,7 +33,7 @@ public final class FilePath {
     public Lazybuf(String volAndPath, int volLen) {
       this.volAndPath = volAndPath;
       this.volLen = volLen;
-      pathLen = len(volAndPath) - volLen;
+      pathLen = volAndPath.length() - volLen;
       w = 0;
     }
 
@@ -56,8 +54,8 @@ public final class FilePath {
           w++;
           return;
         }
-        buf = makechars(pathLen);
-        copy(buf, volAndPath, volLen, volLen + w);
+        buf = new char[pathLen];
+        System.arraycopy(buf, 0, volAndPath, volLen, w);
       }
       buf[w] = c;
       w++;
@@ -68,10 +66,10 @@ public final class FilePath {
         return volAndPath.substring(0, volLen + w);
       }
       // return volAndPath.substring(0, volLen) + string(buf, 0, w);
-      char[] result = makechars(volLen + w);
-      copy(result, volAndPath, 0, volLen);
-      copy(result, volLen, buf, 0, w);
-      return Conversions.string(result);
+      char[] result = new char[volLen + w];
+      System.arraycopy(result, 0, volAndPath, 0, volLen);
+      System.arraycopy(result, volLen, buf, 0, w);
+      return new String(result);
     }
   }
 
@@ -104,7 +102,7 @@ public final class FilePath {
   public static String clean(final String path) {
     final int volLen = volumeNameLen(path);
     int r = volLen; // pathLow
-    final int n = len(path); // pathLen
+    final int n = path.length(); // pathLen
     if (r >= n) {
       if (volLen > 1 && path.charAt(1) != ':') {
         // should be UNC
@@ -189,7 +187,7 @@ public final class FilePath {
       return path;
     }
     // TODO: replace over char array would be more efficient
-    return Strings.replace(path, string(SEPARATOR), "/", -1);
+    return StringUtils.replace(path, String.valueOf(SEPARATOR), "/", -1);
   }
 
   /**
@@ -203,7 +201,7 @@ public final class FilePath {
       return path;
     }
     // TODO: replace over char array would be more efficient
-    return Strings.replace(path, "/", string(SEPARATOR), -1);
+    return StringUtils.replace(path, "/", String.valueOf(SEPARATOR), -1);
   }
 
   public static class ErrBadPattern extends /*PatternSyntaxException*/ IllegalArgumentException {
@@ -247,8 +245,8 @@ public final class FilePath {
   public static boolean match(final String pattern, final String name) {
     int patternLow = 0;
     int nameLow = 0;
-    final int patternHigh = len(pattern);
-    final int nameHigh = len(name);
+    final int patternHigh = pattern.length();
+    final int nameHigh = name.length();
     pattern:
     while (patternLow < patternHigh) {
       final ScanChunkResult scanChunkResult = scanChunk(pattern, patternLow);
@@ -257,7 +255,7 @@ public final class FilePath {
       final int chunkHigh = scanChunkResult.getChunkHigh();
       if (star && chunkLow == chunkHigh) {
         // Trailing * matches rest of string unless it has a /.
-        return !Strings.contains(name, nameLow, string(SEPARATOR));
+        return name.indexOf(SEPARATOR, nameLow) == -1;
       }
       patternLow = scanChunkResult.getRestLow();
       // Look for match at current position.
@@ -312,8 +310,8 @@ public final class FilePath {
    * @return Tuple of (star, chunk, rest)
    */
   // DONE
-  private ScanChunkResult scanChunk(final String pattern, int i /*patternLow*/) {
-    final int patternHigh = len(pattern);
+  private static ScanChunkResult scanChunk(final String pattern, int i /*patternLow*/) {
+    final int patternHigh = pattern.length();
     boolean star = false;
     while (i < patternHigh && pattern.charAt(i) == '*') {
       i++;
@@ -366,8 +364,8 @@ public final class FilePath {
    * @throws ErrBadPattern
    */
   // DONE
-  private MatchChunkResult matchChunk(final String chunk, int chunkLow, final int chunkHigh, final String s, int sLow) {
-    final int sHigh = len(s);
+  private static MatchChunkResult matchChunk(final String chunk, int chunkLow, final int chunkHigh, final String s, int sLow) {
+    final int sHigh = s.length();
     Utf16.DecodeRuneInStringResult decodeRuneInStringResult;
     int n;
     boolean ok = true;
@@ -564,14 +562,14 @@ public final class FilePath {
    * @param path
    * @return
    */
-  private String cleanGlobPath(String path) {
+  private static String cleanGlobPath(String path) {
     if (path.isEmpty()) {
       return ".";
-    } else if (string(SEPARATOR).equals(path)) {
+    } else if (String.valueOf(SEPARATOR).equals(path)) {
       // do nothing to the path
       return path;
     } else {
-      return path.substring(0, len(path) - 1); // chop off trailing separator
+      return path.substring(0, path.length() - 1); // chop off trailing separator
     }
   }
 
@@ -589,8 +587,8 @@ public final class FilePath {
    * @param path
    * @return Tuple of (prefixLen, cleaned)
    */
-  private CleanGlobPathWindowsResult cleanGlobPathWindows(String path) {
-    int length = len(path);
+  private static CleanGlobPathWindowsResult cleanGlobPathWindows(String path) {
+    int length = path.length();
     int vollen = volumeNameLen(path);
     if (path.isEmpty()) {
       return ImmutableCleanGlobPathWindowsResult.of(0, ".");
@@ -620,7 +618,7 @@ public final class FilePath {
    * and its SecurityManager.checkRead(String) method denies read access to the directory
    * @return
    */
-  private void glob(String dir, String pattern, ImmutableList.Builder<String> matches) {
+  private static void glob(String dir, String pattern, ImmutableList.Builder<String> matches) {
     // Pure Java implementation
     File d = new File(dir);
     if (!d.isDirectory()) {
@@ -634,7 +632,7 @@ public final class FilePath {
         }
       }
     );
-    Sort.strings(names);
+    Arrays.sort(names);
     for (String n: names) {
       matches.add(join(dir, n));
     }
@@ -650,7 +648,7 @@ public final class FilePath {
    * @return
    */
   private static boolean hasMeta(String path) {
-    return Strings.containsAny(path, MAGIC_CHARS);
+    return StringUtils.containsAny(path, MAGIC_CHARS);
   }
 
   /**
@@ -665,14 +663,14 @@ public final class FilePath {
    */
   // DONE
   public static String join(String... elem) {
-    int elemHigh = len(elem);
+    int elemHigh = elem.length;
     for (int i = 0; i < elemHigh; i++) {
       String e = elem[i];
       if (!e.isEmpty()) {
         if (Runtime.GOOS == WINDOWS) {
           return joinNonEmpty(elem, i);
         } else {
-          return clean(Strings.join(elem, i, string(SEPARATOR)));
+          return clean(Strings.join(elem, i, String.valueOf(SEPARATOR)));
         }
       }
     }
@@ -688,15 +686,15 @@ public final class FilePath {
    */
   // DONE
   private static String joinNonEmpty(String[] elem, int elemLow) {
-    if (len(elem[elemLow]) == 2 && elem[elemLow].charAt(1) == ':') {
+    if (elem[elemLow].length() == 2 && elem[elemLow].charAt(1) == ':') {
       // First element is drive letter without terminating slash.
       // Keep path relative to current directory on that drive.
-      return clean(elem[elemLow] + Strings.join(elem, elemLow + 1, string(SEPARATOR)));
+      return clean(elem[elemLow] + Strings.join(elem, elemLow + 1, String.valueOf(SEPARATOR)));
     }
     // The following logic prevents Join from inadvertently creating a
     // UNC path on Windows. Unless the first element is a UNC path, Join
     // shouldn't create a UNC path. See golang.org/issue/9167.
-    String p = clean(Strings.join(elem, elemLow, string(SEPARATOR)));
+    String p = clean(Strings.join(elem, elemLow, String.valueOf(SEPARATOR)));
     if (!isUNC(p)) {
       return p;
     }
@@ -707,8 +705,8 @@ public final class FilePath {
     }
     // head + tail == UNC, but joining two non-UNC paths should not result
     // in a UNC path. Undo creation of UNC path.
-    String tail = clean(Strings.join(elem, elemLow + 1, string(SEPARATOR)));
-    if (head.charAt(len(head) - 1) == SEPARATOR) {
+    String tail = clean(Strings.join(elem, elemLow + 1, String.valueOf(SEPARATOR)));
+    if (head.charAt(head.length() - 1) == SEPARATOR) {
       return head + tail;
     }
     return head + SEPARATOR + tail;
@@ -734,7 +732,7 @@ public final class FilePath {
    */
   public static SplitResult split(String path) {
     int volNameLen = volumeNameLen(path);
-    int i = len(path) - 1;
+    int i = path.length() - 1;
     while (i >= volNameLen && !Os.isPathSeparator(path.charAt(i))) {
       i--;
     }
@@ -756,7 +754,7 @@ public final class FilePath {
   // DONE
   public static int volumeNameLen(String path) {
     if (Runtime.GOOS == WINDOWS) {
-      if (len(path) < 2) {
+      if (path.length() < 2) {
         return 0;
       }
       // with drive letter
@@ -766,7 +764,7 @@ public final class FilePath {
       }
       // is it UNC? https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx
       int l;
-      if ((l = len(path)) >= 5 && isSlash(path.charAt(0)) && isSlash(path.charAt(1)) &&
+      if ((l = path.length()) >= 5 && isSlash(path.charAt(0)) && isSlash(path.charAt(1)) &&
               !isSlash(path.charAt(2)) && path.charAt(2) != '.') {
         // first, leading `\\` and next shouldn't be `\`. its server name.
         for (int n = 3; n < l - 1; n++) {
