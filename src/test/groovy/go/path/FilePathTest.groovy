@@ -414,11 +414,12 @@ class FilePathTest {
     FilePath.glob('[]')
   }
 
-                  func TestGlobUNC(t *testing.T) {
-                    // Just make sure this runs without crashing for now.
-                    // See issue 15879.
-                    Glob(`\\?\C:\*`)
-                  }
+  @Test
+  void testGlobUNC() {
+    // Just make sure this runs without crashing for now.
+    // See issue 15879.
+    glob('\\\\?\\C:\\*')
+  }
 
                   var globSymlinkTests = []struct {
                     path, dest string
