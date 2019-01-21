@@ -369,43 +369,37 @@ class FilePathTest {
                     return false
                   }
 
-                  var globTests = []struct {
-                    pattern, result string
-                  }{
-                    {"match.go", "match.go"},
-                    {"mat?h.go", "match.go"},
-                    {"*", "match.go"},
-                    {"../*/match.go", "../filepath/match.go"},
-                  }
+  private static Object[] globTests() {
+    [
+      [ 'match.go', 'match.go' ],
+      [ 'mat?h.go', 'match.go' ],
+      [ '*', 'match.go' ],
+      [ '../*/match.go', '../filepath/match.go'],
+    ].collect { it.toArray(new Object[2]) }.toArray()
+  }
 
-                  func TestGlob(t *testing.T) {
-                    for _, tt := range globTests {
-                      pattern := tt.pattern
-                      result := tt.result
-                      if runtime.GOOS == "windows" {
-                        pattern = Clean(pattern)
-                        result = Clean(result)
-                      }
-                      matches, err := Glob(pattern)
-                      if err != nil {
-                        t.Errorf("Glob error for %q: %s", pattern, err)
-                        continue
-                      }
-                      if !contains(matches, result) {
-                        t.Errorf("Glob(%#q) = %#v want %v", pattern, matches, result)
-                      }
-                    }
-                    for _, pattern := range []string{"no_match", "../*/no_match"} {
-                      matches, err := Glob(pattern)
-                      if err != nil {
-                        t.Errorf("Glob error for %q: %s", pattern, err)
-                        continue
-                      }
-                      if len(matches) != 0 {
-                        t.Errorf("Glob(%#q) = %#v want []", pattern, matches)
-                      }
-                    }
-                  }
+  @Test
+  @Parameters(method = 'globTests')
+  void testGlob(String pattern, String result) {
+    if (Runtime.GOOS == WINDOWS) {
+      pattern = clean(pattern)
+      result = clean(result)
+    }
+    List<String> matches = glob(pattern)
+    assert matches.find { it == result } :
+      sprintf("Glob(%#q) = %#v want %v", pattern, matches, result)
+
+    for _, pattern := range []string{"no_match", "../*/no_match"} {
+      matches, err := Glob(pattern)
+      if err != nil {
+        t.Errorf("Glob error for %q: %s", pattern, err)
+        continue
+      }
+      if len(matches) != 0 {
+        t.Errorf("Glob(%#q) = %#v want []", pattern, matches)
+      }
+    }
+  }
 
   @Test
   void testGlobError() {
