@@ -143,9 +143,12 @@ public final class Utf16 {
    * @exception  RuneError
    */
   public static DecodeRuneInStringResult decodeRuneInString(char[] s, int index) {
+    // Code copied from java.lang.Character#codePointAt(char[], int, int)
+    // and java.lang.Character#codePointAtImpl(char[], int, int)
+    // and changed to work with char array and throw RuneError
     int limit = s.length;
     if ((index < 0) || (index >= limit)) {
-      throw new StringIndexOutOfBoundsException(index);
+      throw new ArrayIndexOutOfBoundsException(index);
     }
     char c1 = s[index];
     if (Character.isHighSurrogate(c1)) {

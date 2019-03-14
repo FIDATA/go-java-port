@@ -71,7 +71,7 @@ jmh {
   // verbosity = 'EXTRA' TODO
   /*
    * WORKAROUND:
-   * Current JMH version has a problem with long classpath under Windows:
+   * Current JMH version has a problem with long classpath under Windows.
    * See https://mail.openjdk.java.net/pipermail/jmh-dev/2019-February/002817.html
    * Until patch is merged we use custom patched version
    */
