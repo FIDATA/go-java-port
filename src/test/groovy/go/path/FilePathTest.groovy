@@ -375,11 +375,13 @@ class FilePathTest {
     }
     if (err != null) {
       thrown.expect(err)
-      thrown.reportMissingExceptionWithMessage(sprintf('Match(%#q, %#q) throws %%s want %s', pattern, s, err))
+      // TODO: format Match(%#q, %#q) throws %%s want %s
+      thrown.reportMissingExceptionWithMessage(sprintf('Match(%s, %s) throws %%s want %s', pattern.inspect(), s.inspect(), err))
     }
     boolean ok = match(pattern, s)
     assert ok == aMatch :
-      sprintf('Match(%#q, %#q) = %v want %v', pattern, s, ok, aMatch)
+      // TODO: format Match(%#q, %#q) = %v want %v
+      sprintf('Match(%s, %s) = %s want %s', pattern.inspect(), s.inspect(), ok, aMatch)
   }
 
 /*// contains returns true if vector contains the string s.

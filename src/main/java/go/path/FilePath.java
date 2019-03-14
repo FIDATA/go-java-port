@@ -87,7 +87,7 @@ public final class FilePath {
           return;
         }
         buf = new char[pathLen];
-        System.arraycopy(buf, 0, volAndPath, volLen, w);
+        System.arraycopy(volAndPath.toCharArray(), volLen, buf, 0, w); // TODO !!!
       }
       buf[w] = c;
       w++;
@@ -99,8 +99,8 @@ public final class FilePath {
       }
       // return volAndPath.substring(0, volLen) + string(buf, 0, w);
       char[] result = new char[volLen + w];
-      System.arraycopy(result, 0, volAndPath, 0, volLen);
-      System.arraycopy(result, volLen, buf, 0, w);
+      System.arraycopy(volAndPath.toCharArray(), 0, result, 0, volLen); // TODO !!!
+      System.arraycopy(buf, 0, result, volLen, w);
       return new String(result);
     }
   }
@@ -280,7 +280,7 @@ public final class FilePath {
     while (patternLow < patternHigh) {
       final ScanChunkResult scanChunkResult = scanChunk(pattern, patternLow);
       final boolean star = scanChunkResult.getStar();
-      final int chunkLow = patternLow;
+      final int chunkLow = scanChunkResult.getChunkLow();
       final int chunkHigh = scanChunkResult.getChunkHigh();
       if (star && chunkLow == chunkHigh) {
         // Trailing * matches rest of string unless it has a /.
@@ -325,6 +325,8 @@ public final class FilePath {
     @Value.Parameter
     public abstract boolean getStar();
     @Value.Parameter
+    public abstract int getChunkLow();
+    @Value.Parameter
     public abstract int getChunkHigh();
     public final int getRestLow() {
       return getChunkHigh();
@@ -338,16 +340,17 @@ public final class FilePath {
    * @param pattern
    * @return Tuple of (star, chunk, rest)
    */
-  private static ScanChunkResult scanChunk(final String pattern, int i /*patternLow*/) {
+  private static ScanChunkResult scanChunk(final String pattern, int chunkLow) {
     final int patternHigh = pattern.length();
     boolean star = false;
-    while (i < patternHigh && pattern.charAt(i) == '*') {
-      i++;
+    while (chunkLow < patternHigh && pattern.charAt(chunkLow) == '*') {
+      chunkLow++;
       star = true;
     }
     boolean inrange = false;
+    int i;
     scan:
-    for(; i < patternHigh; i++) {
+    for (i = chunkLow; i < patternHigh; i++) {
       switch (pattern.charAt(i)) {
         case '\\':
           if (Runtime.GOOS != WINDOWS) {
@@ -370,7 +373,7 @@ public final class FilePath {
           break;
       }
     }
-    return ImmutableScanChunkResult.of(star, i);
+    return ImmutableScanChunkResult.of(star, chunkLow, i);
   }
 
   @Value.Immutable(builder = false)

@@ -36,8 +36,10 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 
+import javax.annotation.Nullable;
+
 @RunWith(JUnitParamsRunner.class)
-final class Utf16Test {
+public final class Utf16Test {
   @Rule
   public final ExpectedException expectedException = ExpectedException.none();
 
@@ -48,14 +50,14 @@ final class Utf16Test {
    * src/unicode/utf16/utf16_test.go
    */
   @Value.Immutable(builder = false)
-  abstract static class EncodeTest {
+  public abstract static class EncodeTest {
     @Value.Parameter
     public abstract int[] getIn();
     @Value.Parameter
     public abstract char[] getOut();
   }
 
-  private static final EncodeTest[] encodeTests() {
+  public final EncodeTest[] encodeTests() {
     return new EncodeTest[]{
       ImmutableEncodeTest.of(new int[]{1, 2, 3, 4}, new char[]{1, 2, 3, 4}),
       ImmutableEncodeTest.of(
@@ -77,15 +79,15 @@ final class Utf16Test {
   @Test
   @Parameters(method = "encodeTests")
   @TestCaseName("testDecodeRuneOnEncodeTest[{index}]")
-  void testDecodeRuneOnEncodeTest(EncodeTest tt) {
+  public void testDecodeRuneOnEncodeTest(EncodeTest tt) {
     int j = 0;
 
     String outAsString = new String(tt.getOut());
 
     for (int r : tt.getIn()) {
-      if (r > /* TODO: Unicode.MaxRune*/ Character.MAX_CODE_POINT) {
-        assertFalse("ran out of tt.out", j >= tt.getOut().length);
+      if (tt.getOut()[j] == /* TODO: unicode.ReplacementChar */ 0xfffd) {
         j++;
+        assertFalse("ran out of tt.out", j > tt.getOut().length);
       } else {
         DecodeRuneInStringResult decodeRuneInStringResult = decodeRuneInString(tt.getOut(), j);
         int dec = decodeRuneInStringResult.getR();
@@ -99,15 +101,14 @@ final class Utf16Test {
         assertEquals(String.format("decodeRuneInString(%s, %d) = %s; want %s", DefaultGroovyMethods.inspect(outAsString), j, DefaultGroovyMethods.inspect(dec), DefaultGroovyMethods.inspect(r)), r, dec);
 
         j += decodeRuneInStringResult.getSize();
-
-        assertFalse("ran out of tt.out", j >= tt.getOut().length);
+        assertFalse("ran out of tt.out", j > tt.getOut().length);
       }
     }
     assertEquals("EncodeRune didn't generate enough output", j, tt.getOut().length);
   }
 
   @Value.Immutable(builder = false)
-  abstract static class DecodeRuneTest {
+  public abstract static class DecodeRuneTest {
     /*
      * CAVEAT:
      * Go for some unknown reason uses rune type for DecodeRune inputs.
@@ -121,10 +122,11 @@ final class Utf16Test {
     @Value.Parameter
     public abstract int getWant();
     @Value.Parameter
+    @Nullable
     public abstract Class<? extends Throwable> getExpectedException();
   }
 
-  private static final DecodeRuneTest[] decodeRuneTests() {
+  public final Object decodeRuneTests() {
     return new DecodeRuneTest[]{
       ImmutableDecodeRuneTest.of((char)0xd800, (char)0xdc00, 0x10000, null),
       ImmutableDecodeRuneTest.of((char)0xd800, (char)0xdc01, 0x10001, null),
@@ -137,12 +139,13 @@ final class Utf16Test {
   @Test
   @Parameters(method = "decodeRuneTests")
   @TestCaseName("testDecodeRuneInStringOnDecodeRuneTest[{index}]")
-  void testDecodeRuneInStringOnDecodeRuneTest(DecodeRuneTest tt) {
+  public void testDecodeRuneInStringOnDecodeRuneTest(DecodeRuneTest tt) {
     String rString = new String(new char[]{tt.getR1(), tt.getR2()});
     if (tt.getExpectedException() != null) {
       expectedException.expect(tt.getExpectedException());
     }
     int got = decodeRuneInString(rString).getR();
-    assertEquals(String.format("DecodeRune(%q, %q) = %v; want %v", tt.getR1(), tt.getR2(), got, tt.getWant()), got, tt.getWant());
+    // TODO: format DecodeRune(%q, %q) = %v; want %v
+    assertEquals(String.format("decodeRuneInString(%s) = %s; want %s", DefaultGroovyMethods.inspect(rString), got, tt.getWant()), got, tt.getWant());
   }
 }
