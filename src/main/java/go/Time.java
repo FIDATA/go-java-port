@@ -1,6 +1,5 @@
 /*
- * Java port of functions for Time formatting and parsing
- * from go/time package
+ * Java port of Go time package
  * Copyright © 2018-2019  Basil Peace
  * Copyright 2009, 2010 The Go Authors. All rights reserved.
  *
@@ -35,7 +34,7 @@ import java.time.Duration;
 
 /**
  * Java port of functions for Time formatting and parsing
- * from {@code go/time} package
+ * from Go {@code time} package
  */
 @SuppressWarnings({"HardCodedStringLiteral", "CharUsedInArithmeticContext", "UnnecessaryExplicitNumericCast"})
 public final class Time {

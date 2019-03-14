@@ -1,4 +1,5 @@
-java-go-port
+# java-go-port
+
 Copyright © 2019  Basil Peace
 
 This library is free software; you can redistribute it and/or modify it
@@ -17,19 +18,25 @@ You should have received a copy of the GNU General Public License along
 with this library; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+# Go
 
 This library contains source code of Go translated to Java.
+
 Copyright 2009, 2010 The Go Authors. All rights reserved.
+
 Use of this source code is governed by a BSD-style
 license that can be found in the licenses/go.txt file.
 
+# OpenJDK
 
 This library contains parts of code copied from OpenJDK 8 and modified.
+
 Copyright (c) 1994, 2013, Oracle and/or its affiliates. All rights reserved.
+
 This code is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License version 2 only, as
-published by the Free Software Foundation.  Oracle designates this
-particular file as subject to the "Classpath" exception as provided
+published by the Free Software Foundation.  Oracle designates these
+particular files as subjects to the "Classpath" exception as provided
 by Oracle in the licenses/openjdk/LICENSE file that accompanied this code.
 
 This code is distributed in the hope that it will be useful, but WITHOUT

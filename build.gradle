@@ -21,25 +21,16 @@
  * with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-/*buildscript {
-  repositories {
-    mavenLocal()
-  }
-  dependencies {
-    classpath 'me.champeau.gradle:jmh-gradle-plugin:0.4.8-SNAPSHOT'
-  }
-}*/
 plugins {
   id 'org.fidata.project' version '6.0.0-gradle-5-0-SNAPSHOT'
   id 'org.fidata.project.java' version '6.0.0-gradle-5-0-SNAPSHOT'
   id 'me.champeau.gradle.jmh' version '0.4.8'
 }
-// plugins.apply 'me.champeau.gradle.jmh'
 
 description = 'Some of core Go packages ported to Java'
 tags.set(['go', 'golang', 'java', 'port']) // TODO
 //noinspection GroovyUnusedAssignment
-// TODO: license = '	GPL-2.0-only' // TODO: WITH Classpath-exception-2.0
+// TODO: license = 'GPL-2.0-only' // TODO: WITH Classpath-exception-2.0
 //noinspection GroovyUnusedAssignment
 publicReleases = true
 contacts {
@@ -47,6 +38,16 @@ contacts {
     moniker 'Basil Peace'
     github 'grv87'
     roles 'owner', 'developer'
+  }
+}
+
+repositories {
+  maven {
+    url 'https://fidata.jfrog.io/fidata/libs-snapshot-local/'
+    credentials {
+      username = project.ext.artifactoryUser
+      password = project.ext.artifactoryPassword
+    }
   }
 }
 
@@ -62,33 +63,24 @@ dependencies {
   testImplementation group: 'com.github.stefanbirkner', name: 'system-rules', version: '[1, 2['
 }
 
-repositories {
-  mavenLocal()
-  /*
-   * Not supported yet.
-   * See https://github.com/gradle/gradle/issues/8191
-   * <grv87 2019-01-09>
-   */
- /* {
-    mavenContent {
-      snapshotsOnly()
-    }
-  }*/
-}
-
 jmh {
   // include = ['Benchmark*']
-  // benchmarkMode = ['AverageTime'] // Default in Go
+  benchmarkMode = ['AverageTime'] // Default in Go
   includeTests = false
-  // https://bugs.openjdk.java.net/browse/CODETOOLS-7902106
-  // https://github.com/melix/jmh-gradle-plugin/issues/103
   jvmArgsAppend = ['-Djmh.separateClasspathJAR=true']
   // verbosity = 'EXTRA' TODO
-  jmhVersion = '1.22-SNAPSHOT'
+  /*
+   * WORKAROUND:
+   * Current JMH version has a problem with long classpath under Windows:
+   * See https://mail.openjdk.java.net/pipermail/jmh-dev/2019-February/002817.html
+   * Until patch is merged we use custom patched version
+   */
+  jmhVersion = '1.22-SNAPSHOT+'
   forceGC = true
-  iterations = 2
-  fork = 1
-  warmupIterations = 1
+  iterations = 3
+  fork = 5
+  warmupIterations = 2
+  profilers = ['gc'] // BenchmarkJoin uses ReportAllocs
 }
 configurations.getByName('jmh').incoming.beforeResolve { dependencies.each { it.status = 'integration' } }
 

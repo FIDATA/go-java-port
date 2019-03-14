@@ -1,4 +1,0 @@
-package go
-
-class StringsTest {
-}
