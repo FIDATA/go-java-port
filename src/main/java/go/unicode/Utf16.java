@@ -28,7 +28,7 @@ import java.nio.charset.CharacterCodingException;
 import java.io.IOException;
 
 /**
- * In Go, package utf8 implements functions and constants to support text encoded in
+ * In Go, package {@code utf8} implements functions and constants to support text encoded in
  * UTF-8. It includes functions to translate between runes and UTF-8 byte sequences.
  *
  * Since JVM stores Strings in UTF-16, methods, accepting or returning String,

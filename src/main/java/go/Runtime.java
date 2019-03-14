@@ -27,7 +27,7 @@ import org.apache.commons.lang3.SystemUtils;
 import java.util.Locale;
 
 /**
- * Port of Go {@code runtime} package
+ * Go {@code runtime} package
  */
 public final class Runtime {
   /**

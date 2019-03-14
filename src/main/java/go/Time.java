@@ -33,8 +33,7 @@ import java.util.concurrent.TimeUnit;
 import java.time.Duration;
 
 /**
- * Java port of functions for Time formatting and parsing
- * from Go {@code time} package
+ * Go package {@code time} provides functionality for measuring and displaying time.
  */
 @SuppressWarnings({"HardCodedStringLiteral", "CharUsedInArithmeticContext", "UnnecessaryExplicitNumericCast"})
 public final class Time {

@@ -57,6 +57,8 @@ dependencies {
   api group: 'org.jooq', name: 'joou-java-6', version: '[0, 1['
   api group: 'com.google.guava', name: 'guava', version: '27.0-jre'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: '[3, 4['
+  testAnnotationProcessor group: 'org.immutables', name: 'value', version: '[2, 3['
+  testCompileOnly group: 'org.immutables', name: 'value', version: '[2, 3['
   testImplementation localGroovy()
   testImplementation group: 'org.hamcrest', name: 'hamcrest-library', version: '[1, 2['
   testImplementation group: 'pl.pragmatists', name: 'JUnitParams', version: '[1, 2['

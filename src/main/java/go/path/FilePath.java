@@ -1,3 +1,26 @@
+/*
+ * Java port of Go path/filepath package
+ * Copyright © 2019  Basil Peace
+ * Copyright 2009 The Go Authors. All rights reserved.
+ *
+ * This file is part of go-java-port.
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation. Basil Peace designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Basil Peace in the LICENSE file that accompanied this code.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 package go.path;
 
 import static go.Runtime.GoOS.*;
@@ -13,6 +36,15 @@ import java.io.FilenameFilter;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Go package {@code filepath} implements utility routines for manipulating filename paths
+ * in a way compatible with the target operating system-defined file paths.
+ *
+ * The {@code filepath} package uses either forward slashes or backslashes,
+ * depending on the operating system. To process paths such as URLs
+ * that always use forward slashes regardless of the operating
+ * system, see the {@code path} package.
+ */
 public final class FilePath {
   public static final char SEPARATOR = Os.PATH_SEPARATOR;
 
@@ -98,7 +130,6 @@ public final class FilePath {
    * Getting Dot-Dot Right,''
    * https://9p.io/sys/doc/lexnames.html
    */
-  // DONE
   public static String clean(final String path) {
     final int volLen = volumeNameLen(path);
     int r = volLen; // pathLow
@@ -181,7 +212,6 @@ public final class FilePath {
    * @param path
    * @return
    */
-  // DONE
   public static String toSlash(String path) {
     if (SEPARATOR == '/') {
       return path;
@@ -195,7 +225,6 @@ public final class FilePath {
    * in path with a separator character. Multiple slashes are replaced
    * by multiple separators.
    */
-  // DONE
   public static String fromSlash(String path) {
     if (SEPARATOR == '/') {
       return path;
@@ -309,7 +338,6 @@ public final class FilePath {
    * @param pattern
    * @return Tuple of (star, chunk, rest)
    */
-  // DONE
   private static ScanChunkResult scanChunk(final String pattern, int i /*patternLow*/) {
     final int patternHigh = pattern.length();
     boolean star = false;
@@ -363,7 +391,6 @@ public final class FilePath {
    * @return Tuple of (rest, ok)
    * @throws ErrBadPattern
    */
-  // DONE
   private static MatchChunkResult matchChunk(final String chunk, int chunkLow, final int chunkHigh, final String s, int sLow) {
     final int sHigh = s.length();
     Utf16.DecodeRuneInStringResult decodeRuneInStringResult;
@@ -475,7 +502,6 @@ public final class FilePath {
    * @return (r, nchunk)
    * @throws ErrBadPattern
    */
-  // DONE
   private static GetEscResult getEsc(final String chunk, int chunkLow, final int chunkHigh) {
     if (chunkLow >= chunkHigh || chunk.charAt(chunkLow) == '-' || chunk.charAt(chunkLow) == ']') {
       throw new ErrBadPattern();
@@ -661,7 +687,6 @@ public final class FilePath {
    * @param elem
    * @return
    */
-  // DONE
   public static String join(String... elem) {
     int elemHigh = elem.length;
     for (int i = 0; i < elemHigh; i++) {
@@ -684,7 +709,6 @@ public final class FilePath {
    * @param elem
    * @return
    */
-  // DONE
   private static String joinNonEmpty(String[] elem, int elemLow) {
     if (elem[elemLow].length() == 2 && elem[elemLow].charAt(1) == ':') {
       // First element is drive letter without terminating slash.
@@ -751,7 +775,6 @@ public final class FilePath {
    * @param path
    * @return
    */
-  // DONE
   public static int volumeNameLen(String path) {
     if (Runtime.GOOS == WINDOWS) {
       if (path.length() < 2) {
@@ -800,7 +823,6 @@ public final class FilePath {
    * @param path
    * @return
    */
-  // DONE
   private static boolean isUNC(String path) {
     return volumeNameLen(path) > 2;
   }

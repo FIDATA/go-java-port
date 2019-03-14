@@ -25,10 +25,8 @@
  */
 package go
 
-import go.Time
-import groovy.transform.CompileStatic
-
 import static org.hamcrest.Matchers.startsWith
+import groovy.transform.CompileStatic
 import java.time.Duration
 import java.time.format.DateTimeParseException
 import junitparams.JUnitParamsRunner
@@ -167,6 +165,7 @@ final class TimeTest {
   @Parameters(method = 'parseDurationTests')
   @TestCaseName('parseDuration("{0}") {3}')
   void testParseDuration(final String aIn, final boolean ok, final Duration want, final String ignored) {
+    // TODO: refactor ?
     if (ok) {
       assert Time.parseDuration(aIn) == want
     } else {

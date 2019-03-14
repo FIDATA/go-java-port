@@ -27,7 +27,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * Package {@code strings} implements simple functions to manipulate UTF-16 encoded strings.
+ * Go package {@code strings} implements simple functions to manipulate UTF-16 encoded strings.
  */
 /*
  * Source files:

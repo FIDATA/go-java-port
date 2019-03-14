@@ -26,7 +26,7 @@ package go;
 import static go.Runtime.GoOS.*;
 
 /**
- * Package {@code os} provides a platform-independent interface to operating system
+ * Go package {@code os} provides a platform-independent interface to operating system
  * functionality.
  *
  * The {@code os} interface is intended to be uniform across all operating systems.
