@@ -89,3 +89,7 @@ configurations.getByName('jmh').incoming.beforeResolve { dependencies.each { it.
 wrapper {
   gradleVersion = '5.1'
 }
+
+/*test {
+  systemProperty 'os.name', 'Linux'
+}*/

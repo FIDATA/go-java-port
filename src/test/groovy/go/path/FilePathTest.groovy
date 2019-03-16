@@ -158,7 +158,6 @@ class FilePathTest {
     testClean path, result
   }
 
-
   private static final char SEP = SEPARATOR
 
   private static Object[] slashtests() {
@@ -325,8 +324,8 @@ class FilePathTest {
       ['ab[^c]', 'abc', false, null],
       ['ab[^b-d]', 'abc', false, null],
       ['ab[^e-g]', 'abc', true, null],
-      ['a\\\\*b', 'a*b', true, null],
-      ['a\\\\*b', 'ab', false, null],
+      ['a\\*b', 'a*b', true, null],
+      ['a\\*b', 'ab', false, null],
       ['a?b', 'a☺b', true, null],
       ['a[^a]b', 'a☺b', true, null],
       ['a???b', 'a☺b', false, null],
@@ -335,14 +334,14 @@ class FilePathTest {
       ['*[a-ζ]', 'A', false, null],
       ['a?b', 'a/b', false, null],
       ['a*b', 'a/b', false, null],
-      ['[\\\\]a]', ']', true, null],
-      ['[\\\\-]', '-', true, null],
-      ['[x\\\\-]', 'x', true, null],
-      ['[x\\\\-]', '-', true, null],
-      ['[x\\\\-]', 'z', false, null],
-      ['[\\\\-x]', 'x', true, null],
-      ['[\\\\-x]', '-', true, null],
-      ['[\\\\-x]', 'a', false, null],
+      ['[\\]a]', ']', true, null],
+      ['[\\-]', '-', true, null],
+      ['[x\\-]', 'x', true, null],
+      ['[x\\-]', '-', true, null],
+      ['[x\\-]', 'z', false, null],
+      ['[\\-x]', 'x', true, null],
+      ['[\\-x]', '-', true, null],
+      ['[\\-x]', 'a', false, null],
       ['[]a]', ']', false, ErrBadPattern],
       ['[-]', '-', false, ErrBadPattern],
       ['[x-]', 'x', false, ErrBadPattern],
@@ -351,7 +350,7 @@ class FilePathTest {
       ['[-x]', 'x', false, ErrBadPattern],
       ['[-x]', '-', false, ErrBadPattern],
       ['[-x]', 'a', false, ErrBadPattern],
-      ['\\\\', 'a', false, ErrBadPattern],
+      ['\\', 'a', false, ErrBadPattern],
       ['[a-b-c]', 'a', false, ErrBadPattern],
       ['[', 'a', false, ErrBadPattern],
       ['[^', 'a', false, ErrBadPattern],
