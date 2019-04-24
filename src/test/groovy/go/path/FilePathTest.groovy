@@ -144,13 +144,6 @@ class FilePathTest {
       sprintf("Clean(%s) = %s, want %s", result, s, result)
   }
 
-  /*
-   * CAVEAT:
-   * Go runs Windows tests only if current runtime is Windows.
-   * This has a drawback that cases should be run
-   * We cheat OS detection and make it think we are under Windows.
-   * <grv87 2018-01-15>
-   */
   @Test
   @Parameters(method = 'wincleantests')
   void testCleanWindows(String path, String result) {
@@ -158,14 +151,27 @@ class FilePathTest {
     testClean path, result
   }
 
-  private static final char SEP = SEPARATOR
+  /*private static Object[] os() {
+    [
+      'Windows Fiction',
+      'Linux Generic',
+    ].toArray()
+  }*/
 
   private static Object[] slashtests() {
+    /*
+     * CAVEAT:
+     * Go runs Windows tests only if current runtime is Windows.
+     * This has a drawback that cases should be run
+     * We cheat OS detection and make it think we are under Windows.
+     * <grv87 2018-01-15>
+     */
+    final char sep = SEPARATOR
     [
       ['', ''],
-      ['/', Character.toString(SEP)],
-      ['/a/b', "${ SEP }a${ SEP }b".toString()],
-      ['a//b', "a${ SEP }${ SEP }b".toString()],
+      ['/', Character.toString(sep)],
+      ['/a/b', "${ sep }a${ sep }b".toString()],
+      ['a//b', "a${ sep }${ sep }b".toString()],
     ].collect { it.toArray(new Object[2]) }.toArray()
   }
 
@@ -365,10 +371,10 @@ class FilePathTest {
   @Parameters(method = 'matchTests')
   void testMatch(String pattern, String s, boolean aMatch, Class<? extends Exception> err) {
     if (Runtime.GOOS == WINDOWS) {
-      /*if strings.Contains(pattern, "\\") {
+      if (pattern.contains("\\")) {
         // no escape allowed on windows.
-        continue
-      }*/
+        return
+      }
       pattern = clean(pattern)
       s = clean(s)
     }

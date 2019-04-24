@@ -76,6 +76,7 @@ jmh {
    * Current JMH version has a problem with long classpath under Windows.
    * See https://mail.openjdk.java.net/pipermail/jmh-dev/2019-February/002817.html
    * Until patch is merged we use custom patched version
+   * <grv87 2019-03-19>
    */
   jmhVersion = '1.22-SNAPSHOT+'
   forceGC = true
@@ -90,6 +91,6 @@ wrapper {
   gradleVersion = '5.1'
 }
 
-/*test {
+test {
   systemProperty 'os.name', 'Linux'
-}*/
+}
