@@ -1,6 +1,6 @@
 /*
  * Benchmark for Java port of Go strings.join func
- * Copyright © 2019  Basil Peace
+ * Copyright ©  Basil Peace
  * Copyright 2009 The Go Authors. All rights reserved.
  *
  * This file is part of go-java-port.

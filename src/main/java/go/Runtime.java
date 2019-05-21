@@ -1,6 +1,6 @@
 /*
  * Java port of Go runtime package
- * Copyright © 2018-2019  Basil Peace
+ * Copyright ©  Basil Peace
  * Copyright 2009, 2011 The Go Authors. All rights reserved.
  *
  * This file is part of go-java-port.

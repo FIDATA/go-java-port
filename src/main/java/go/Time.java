@@ -1,6 +1,6 @@
 /*
  * Java port of Go time package
- * Copyright © 2018-2019  Basil Peace
+ * Copyright ©  Basil Peace
  * Copyright 2009, 2010 The Go Authors. All rights reserved.
  *
  * This file is part of go-java-port.

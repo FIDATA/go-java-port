@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 /*
  * Tests for Java port of Go path/filepath package
- * Copyright © 2019  Basil Peace
+ * Copyright ©  Basil Peace
  * Copyright 2009 The Go Authors. All rights reserved.
  *
  * This file is part of go-java-port.

@@ -2,7 +2,7 @@
 /*
  * Java port of tests for functions for Time formatting and parsing
  * from go/time package
- * Copyright © 2018-2019  Basil Peace
+ * Copyright ©  Basil Peace
  * Copyright 2009, 2010 The Go Authors. All rights reserved.
  *
  * This file is part of go-java-port.
